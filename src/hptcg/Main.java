@@ -149,7 +149,7 @@ public class Main {
     while(true) {
       while(!youTurn) {
         if(newMoveFromOpponent()) {
-          applyOpponentsMove();
+          m.applyOpponentsMove();
         }
         waitFor(1000);
       }
