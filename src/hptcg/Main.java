@@ -70,7 +70,7 @@ public class Main {
 
   private JPanel handPanel() {
     handPanel = new JPanel();
-    handPanel.setPreferredSize(new Dimension(availableWidth, 250));
+    handPanel.setPreferredSize(new Dimension(availableWidth, 125));
     handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
     handPanel.add(getCardImage("Charms"));
     handPanel.add(getCardImage("Transfiguration"));
@@ -97,9 +97,16 @@ public class Main {
         e.printStackTrace();
       }
       imageIcon = new ImageIcon(cardImage);
+      imageIcon = resizeImage(imageIcon);
       cardsImageIcons.put(cardName, imageIcon);
     }
     return imageIcon;
+  }
+
+  private ImageIcon resizeImage(ImageIcon imageIcon) {
+    Image image = imageIcon.getImage();
+    Image newImage = image.getScaledInstance(175, 125,  java.awt.Image.SCALE_SMOOTH);
+    return new ImageIcon(newImage);
   }
 
   public static void main(String[] args) {
