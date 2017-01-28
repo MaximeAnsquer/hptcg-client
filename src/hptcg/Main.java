@@ -25,6 +25,9 @@ public class Main {
   private static int opponentsId;
   public static int availableWidth;
   public static int availableHeight;
+  public static boolean youTurn;
+  public static JTextArea gameMessagesPanel;
+  public static JLabel mainMessageLabel;
 
   public Main() {
     savedOpponentsLastMoveId = 0;
@@ -33,11 +36,43 @@ public class Main {
     setSize();
     Container contentPane = frame.getContentPane();
     contentPane.setLayout(new BorderLayout());
-    contentPane.add(handPanel(), BorderLayout.SOUTH);
-    contentPane.add(boardPanel());
+    contentPane.add(handAndMainMessagePanels(), BorderLayout.SOUTH);
+    contentPane.add(boardPanel(), BorderLayout.CENTER);
+    contentPane.add(gameMessagesPanel(), BorderLayout.EAST);
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.pack();
     frame.setVisible(true);
+  }
+
+  private JPanel handAndMainMessagePanels() {
+    JPanel handAndMainMessagePanels = new JPanel();
+    handAndMainMessagePanels.setLayout(new BoxLayout(handAndMainMessagePanels, BoxLayout.Y_AXIS));
+    handAndMainMessagePanels.add(mainMessagePanel());
+    handAndMainMessagePanels.add(handPanel());
+    return handAndMainMessagePanels;
+  }
+
+  private JPanel mainMessagePanel() {
+    JPanel mainMessagePanel = new JPanel();
+    mainMessagePanel.add(mainMessageLabel());
+    return mainMessagePanel;
+  }
+
+  private JLabel mainMessageLabel() {
+    mainMessageLabel = new JLabel("This is the main message");
+    return mainMessageLabel;
+  }
+
+  private JScrollPane gameMessagesPanel() {
+    gameMessagesPanel = new JTextArea();
+    gameMessagesPanel.setLayout(new BoxLayout(gameMessagesPanel, BoxLayout.Y_AXIS));
+    for(int i=0; i<10; i++) {
+      JLabel label = new JLabel("Lolilol " + i);
+//      label.setPreferredSize(new Dimension(100, 20));
+      gameMessagesPanel.append("\n LOLILO " + i);
+    }
+    gameMessagesPanel.append("\n LOLILOLOLILOLOLILOLOLILOLOLILOLOLILO");
+    return new JScrollPane(gameMessagesPanel);
   }
 
   private void setSize() {
@@ -64,6 +99,7 @@ public class Main {
 
   private JPanel playedCards() {
     playedCards = new JPanel();
+    playedCards.setBackground(Color.GREEN);
     playedCards.setLayout(new BoxLayout(playedCards, BoxLayout.X_AXIS));
     return playedCards;
   }
@@ -77,7 +113,7 @@ public class Main {
     handPanel.add(getCardImage("Charms"));
     handPanel.add(getCardImage("Transfiguration"));
     handPanel.add(getCardImage("Transfiguration"));
-    handPanel.setBackground(Color.RED);
+    handPanel.add(getCardImage("Charms"));
     return handPanel;
   }
 
@@ -117,20 +153,29 @@ public class Main {
     waitForOpponent();
 
     while(true) {
-      if(newMoveFromOpponent()) {
-        addOpponentCard(m);
+      while(!youTurn) {
+        if(newMoveFromOpponent()) {
+          applyOpponentsMove(m);
+        }
+        waitFor(1000);
       }
-      waitFor(1000);
     }
+
   }
 
   private static void waitForOpponent() {
     boolean waiting = true;
     System.out.println("Waiting for an opponent to connect to the server...");
+    mainMessageLabel.setText("Waiting for an opponent");
     while(waiting) {
       if(get("http://hptcg-server.herokuapp.com/game/player" + opponentsId + "/status").equals("connected")) {
         waiting = false;
         System.out.println("An opponent joined the game!");
+        if(youTurn) {
+          mainMessageLabel.setText("It's your turn");
+        } else {
+          mainMessageLabel.setText("It's your opponent's turn.");
+        }
       }
     }
   }
@@ -143,18 +188,25 @@ public class Main {
     }
   }
 
-  private static void addOpponentCard(Main m) {
+  private static void applyOpponentsMove(Main m) {
     String cardName = get("http://hptcg-server.herokuapp.com/game/player" + opponentsId + "/lastCardPlayed");
     System.out.println("Opponent played: " + cardName);
     m.opponentsCards.add(m.getCardImage(cardName));
     m.frame.repaint();
     m.frame.pack();
+    beginYourTurn();
+  }
+
+  private static void beginYourTurn() {
+    youTurn = true;
+    mainMessageLabel.setText("This is your turn");
   }
 
   private static void connectToServer() {
     playerId = Integer.parseInt(get("http://hptcg-server.herokuapp.com/game/join"));
     System.out.println("You are player " + playerId);
     opponentsId = playerId == 1 ? 2 : 1;
+    youTurn = playerId == 1;
   }
 
   private static boolean newMoveFromOpponent() {
@@ -183,4 +235,12 @@ public class Main {
     return result;
   }
 
+  public void endYourTurn() {
+    youTurn = false;
+    mainMessageLabel.setText("It's your opponent's turn.");
+  }
+
+  public void addMessage(String s) {
+    gameMessagesPanel.append("\n" + s);
+  }
 }
