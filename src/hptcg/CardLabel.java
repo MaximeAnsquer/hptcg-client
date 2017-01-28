@@ -1,7 +1,6 @@
 package hptcg;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -12,7 +11,7 @@ public class CardLabel extends JLabel {
     this.addMouseListener(new MouseListener() {
       @Override
       public void mouseClicked(MouseEvent e) {
-//        Main.get("http://hptcg-server.herokuapp.com/game/player" + Main.playerId + "/play/" + cardName);
+        Main.get("http://hptcg-server.herokuapp.com/game/player" + Main.playerId + "/play/" + cardName);
         main.handPanel.remove(CardLabel.this);
         CardLabel.this.removeMouseListener(this);
         main.playedCards.add(CardLabel.this);

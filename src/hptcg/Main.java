@@ -113,15 +113,15 @@ public class Main {
 
     Main m = new Main();
 
-//    connectToServer();
-//    waitForOpponent();
-//
-//    while(true) {
-//      if(newMoveFromOpponent()) {
-//        addOpponentCard(m);
-//      }
-//      waitFor(1000);
-//    }
+    connectToServer();
+    waitForOpponent();
+
+    while(true) {
+      if(newMoveFromOpponent()) {
+        addOpponentCard(m);
+      }
+      waitFor(1000);
+    }
   }
 
   private static void waitForOpponent() {
