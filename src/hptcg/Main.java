@@ -158,8 +158,6 @@ public class Main {
 
   private static boolean newMoveFromOpponent() {
     int fetchOpponentsLastMoveId = fetchOpponentsLastMoveId();
-    System.out.println("savedOpponentsLastMoveId: " + savedOpponentsLastMoveId);
-    System.out.println("fetchOpponentsLastMoveId: " + fetchOpponentsLastMoveId);
     if (fetchOpponentsLastMoveId != savedOpponentsLastMoveId) {
       System.out.println("New move from opponent!");
     }
