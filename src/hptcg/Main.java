@@ -66,12 +66,6 @@ public class Main {
   private JScrollPane gameMessagesPanel() {
     gameMessagesPanel = new JTextArea();
     gameMessagesPanel.setLayout(new BoxLayout(gameMessagesPanel, BoxLayout.Y_AXIS));
-    for(int i=0; i<10; i++) {
-      JLabel label = new JLabel("Lolilol " + i);
-//      label.setPreferredSize(new Dimension(100, 20));
-      gameMessagesPanel.append("\n LOLILO " + i);
-    }
-    gameMessagesPanel.append("\n LOLILOLOLILOLOLILOLOLILOLOLILOLOLILO");
     return new JScrollPane(gameMessagesPanel);
   }
 
@@ -108,6 +102,12 @@ public class Main {
     handPanel = new JPanel();
     handPanel.setPreferredSize(new Dimension(availableWidth, 125));
     handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
+    handPanel.add(getCardImage("Charms"));
+    handPanel.add(getCardImage("Transfiguration"));
+    handPanel.add(getCardImage("Charms"));
+    handPanel.add(getCardImage("Transfiguration"));
+    handPanel.add(getCardImage("Transfiguration"));
+    handPanel.add(getCardImage("Charms"));
     return handPanel;
   }
 
