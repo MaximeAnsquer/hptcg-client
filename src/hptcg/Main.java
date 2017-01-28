@@ -23,20 +23,28 @@ public class Main {
   private static int savedOpponentsLastMoveId;
   public static int playerId;
   private static int opponentsId;
+  public static int availableWidth;
+  public static int availableHeight;
 
   public Main() {
     savedOpponentsLastMoveId = 0;
     cardsImageIcons = new Hashtable<>();
     frame = new JFrame("Harry Potter TCG");
-    frame.setPreferredSize(new Dimension(1920, 1050));
+    setSize();
     Container contentPane = frame.getContentPane();
     contentPane.setLayout(new BorderLayout());
     contentPane.add(handPanel(), BorderLayout.SOUTH);
     contentPane.add(boardPanel());
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-//    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     frame.pack();
     frame.setVisible(true);
+  }
+
+  private void setSize() {
+    Rectangle availableSpace = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+    availableWidth = (int) availableSpace.getWidth();
+    availableHeight = (int) availableSpace.getHeight();
+    frame.setPreferredSize(new Dimension(availableWidth, availableHeight));
   }
 
   private JPanel boardPanel() {
@@ -62,7 +70,7 @@ public class Main {
 
   private JPanel handPanel() {
     handPanel = new JPanel();
-    handPanel.setPreferredSize(new Dimension(1920, 250));
+    handPanel.setPreferredSize(new Dimension(availableWidth, 250));
     handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
     handPanel.add(getCardImage("Charms"));
     handPanel.add(getCardImage("Transfiguration"));
@@ -94,33 +102,19 @@ public class Main {
     return imageIcon;
   }
 
-//  public void repaintHand() {
-//    Component[] cards = handPanel.getComponents();
-//    System.out.println("cards.length:" + cards.length);
-//    handPanel.removeAll();
-//    int i = 0;
-//    for (Component card: cards) {
-//      System.out.println("lol");
-//      handPanel.add(getCardImage("Charms"));
-//      i++;
-//    }
-//    handPanel.repaint();
-//    frame.repaint();
-//  }
-
   public static void main(String[] args) {
 
     Main m = new Main();
 
-    connectToServer();
-    waitForOpponent();
-
-    while(true) {
-      if(newMoveFromOpponent()) {
-        addOpponentCard(m);
-      }
-      waitFor(1000);
-    }
+//    connectToServer();
+//    waitForOpponent();
+//
+//    while(true) {
+//      if(newMoveFromOpponent()) {
+//        addOpponentCard(m);
+//      }
+//      waitFor(1000);
+//    }
   }
 
   private static void waitForOpponent() {
