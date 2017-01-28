@@ -160,8 +160,11 @@ public class Main {
     int fetchOpponentsLastMoveId = fetchOpponentsLastMoveId();
     if (fetchOpponentsLastMoveId != savedOpponentsLastMoveId) {
       System.out.println("New move from opponent!");
+      savedOpponentsLastMoveId++;
+      return true;
+    } else {
+      return false;
     }
-    return fetchOpponentsLastMoveId != savedOpponentsLastMoveId;
   }
 
   private static int fetchOpponentsLastMoveId() {

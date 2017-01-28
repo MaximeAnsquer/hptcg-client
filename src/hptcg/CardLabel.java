@@ -12,12 +12,12 @@ public class CardLabel extends JLabel {
     this.addMouseListener(new MouseListener() {
       @Override
       public void mouseClicked(MouseEvent e) {
+        Main.get("http://hptcg-server.herokuapp.com/game/player" + Main.playerId + "/play/" + cardName);
         main.handPanel.remove(CardLabel.this);
         CardLabel.this.removeMouseListener(this);
         main.playedCards.add(CardLabel.this);
         main.frame.repaint();
         main.frame.pack();
-        Main.get("http://hptcg-server.herokuapp.com/game/player" + Main.playerId + "/play/" + cardName);
       }
 
       @Override
