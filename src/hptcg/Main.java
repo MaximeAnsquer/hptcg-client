@@ -147,8 +147,10 @@ public class Main {
     waitForOpponent();
 
     while(true) {
+      waitFor(100);
       while(!youTurn) {
         if(newMoveFromOpponent()) {
+          System.out.println("newMoveFromOpponent returns true");
           m.applyOpponentsMove();
         }
         waitFor(1000);
@@ -183,6 +185,7 @@ public class Main {
   }
 
   private void applyOpponentsMove() {
+    System.out.println("Applying opponent's move");
     String cardName = get("http://hptcg-server.herokuapp.com/game/player" + opponentsId + "/lastCardPlayed");
     System.out.println("Opponent played: " + cardName);
     addMessage("Your opponent played: " + cardName);
@@ -193,6 +196,7 @@ public class Main {
   }
 
   private void beginYourTurn() {
+    System.out.println("Beginning your turn");
     youTurn = true;
     mainMessageLabel.setText("This is your turn");
     frame.repaint();

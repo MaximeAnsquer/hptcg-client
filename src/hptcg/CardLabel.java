@@ -17,6 +17,7 @@ public class CardLabel extends JLabel {
           CardLabel.this.removeMouseListener(this);
           main.playedCards.add(CardLabel.this);
           main.addMessage("You played " + cardName);
+          System.out.println("You played " + cardName);
           main.endYourTurn();
           main.frame.repaint();
           main.frame.pack();
