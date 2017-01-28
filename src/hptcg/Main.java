@@ -108,12 +108,6 @@ public class Main {
     handPanel = new JPanel();
     handPanel.setPreferredSize(new Dimension(availableWidth, 125));
     handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
-    handPanel.add(getCardImage("Charms"));
-    handPanel.add(getCardImage("Transfiguration"));
-    handPanel.add(getCardImage("Charms"));
-    handPanel.add(getCardImage("Transfiguration"));
-    handPanel.add(getCardImage("Transfiguration"));
-    handPanel.add(getCardImage("Charms"));
     return handPanel;
   }
 
@@ -191,6 +185,7 @@ public class Main {
   private static void applyOpponentsMove(Main m) {
     String cardName = get("http://hptcg-server.herokuapp.com/game/player" + opponentsId + "/lastCardPlayed");
     System.out.println("Opponent played: " + cardName);
+    m.addMessage("Your opponent played: " + cardName);
     m.opponentsCards.add(m.getCardImage(cardName));
     m.frame.repaint();
     m.frame.pack();
