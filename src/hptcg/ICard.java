@@ -6,4 +6,6 @@ public interface ICard {
    * @return Whether the card can be played or its condition is not fulfilled.
    */
   boolean conditionFulfilled();
+
+  void playCard();
 }

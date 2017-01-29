@@ -1,4 +1,4 @@
-package hptcg.lesson;
+package hptcg;
 
 public enum LessonType {
   CARE_OF_MAGICAL_CREATURES,

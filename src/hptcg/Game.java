@@ -8,11 +8,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class Main {
+public class Game {
 
   public JFrame frame;
   public JPanel handPanel;
@@ -21,15 +22,15 @@ public class Main {
   public JPanel opponentsCards;
   private Map<String, ImageIcon> cardsImageIcons;
   private static int savedOpponentsLastMoveId;
-  public static int playerId;
+  private int playerId;
   private static int opponentsId;
   public static int availableWidth;
   public static int availableHeight;
-  public static boolean youTurn;
+  public boolean yourTurn;
   public static JTextArea gameMessagesPanel;
   public static JLabel mainMessageLabel;
 
-  public Main() {
+  public Game() {
     savedOpponentsLastMoveId = 0;
     cardsImageIcons = new Hashtable<>();
     frame = new JFrame("Harry Potter TCG");
@@ -102,20 +103,16 @@ public class Main {
     handPanel = new JPanel();
     handPanel.setPreferredSize(new Dimension(availableWidth, 125));
     handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
-    handPanel.add(getCardImage("Charms"));
-    handPanel.add(getCardImage("Transfiguration"));
-    handPanel.add(getCardImage("Charms"));
-    handPanel.add(getCardImage("Transfiguration"));
-    handPanel.add(getCardImage("Transfiguration"));
-    handPanel.add(getCardImage("Charms"));
+    handPanel.add(new Charms(this));
+    handPanel.add(new Transfiguration(this));
+    handPanel.add(new Charms(this));
+    handPanel.add(new Transfiguration(this));
+    handPanel.add(new Transfiguration(this));
+    handPanel.add(new Charms(this));
     return handPanel;
   }
 
-  private CardLabel getCardImage(String cardName) {
-    return new CardLabel(getImageIcon(cardName),this, cardName);
-  }
-
-  private ImageIcon getImageIcon(String cardName) {
+  public ImageIcon getImageIcon(String cardName) {
     ImageIcon imageIcon;
     if (cardsImageIcons.containsKey(cardName)) {
       imageIcon = cardsImageIcons.get(cardName);
@@ -141,17 +138,17 @@ public class Main {
 
   public static void main(String[] args) {
 
-    Main m = new Main();
+    Game game = new Game();
 
-    connectToServer();
-    waitForOpponent();
+    game.connectToServer();
+    game.waitForOpponent();
 
     while(true) {
-      waitFor(100);
-      while(!youTurn) {
-        if(newMoveFromOpponent()) {
+      waitFor(100);  // delay so that the yourTurn variable knows it changed
+      while(!game.itsYourTurn()) {
+        if(game.newMoveFromOpponent()) {
           System.out.println("newMoveFromOpponent returns true");
-          m.applyOpponentsMove();
+          game.applyOpponentsMove();
         }
         waitFor(1000);
       }
@@ -159,15 +156,20 @@ public class Main {
 
   }
 
-  private static void waitForOpponent() {
+  private boolean itsYourTurn() {
+    return yourTurn;
+  }
+
+  private void waitForOpponent() {
     boolean waiting = true;
     System.out.println("Waiting for an opponent to connect to the server...");
     mainMessageLabel.setText("Waiting for an opponent");
     while(waiting) {
-      if(get("http://hptcg-server.herokuapp.com/game/player" + opponentsId + "/status").equals("connected")) {
+      if(get("game/player" + opponentsId + "/status").equals("connected")) {
         waiting = false;
         System.out.println("An opponent joined the game!");
-        if(youTurn) {
+        yourTurn = playerId == 1;
+        if(yourTurn) {
           mainMessageLabel.setText("It's your turn");
         } else {
           mainMessageLabel.setText("It's your opponent's turn.");
@@ -186,31 +188,52 @@ public class Main {
 
   private void applyOpponentsMove() {
     System.out.println("Applying opponent's move");
-    String cardName = get("http://hptcg-server.herokuapp.com/game/player" + opponentsId + "/lastCardPlayed");
+    String cardName = get("game/player" + opponentsId + "/lastCardPlayed");
     System.out.println("Opponent played: " + cardName);
     addMessage("Your opponent played: " + cardName);
-    opponentsCards.add(getCardImage(cardName));
-    frame.repaint();
-    frame.pack();
+    opponentsCards.add(createCard(cardName));
+    refresh();
     beginYourTurn();
+  }
+
+  private Card createCard(String cardName) {
+    Class cardClass = null;
+    try {
+      cardClass = Class.forName("hptcg." + cardName);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+    Card card = null;
+    try {
+      card = (Card) cardClass.getDeclaredConstructor(Game.class).newInstance(this);
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    }
+    return card;
   }
 
   private void beginYourTurn() {
     System.out.println("Beginning your turn");
-    youTurn = true;
+    yourTurn = true;
     mainMessageLabel.setText("This is your turn");
     frame.repaint();
     frame.pack();
   }
 
-  private static void connectToServer() {
-    playerId = Integer.parseInt(get("http://hptcg-server.herokuapp.com/game/join"));
+  private void connectToServer() {
+    playerId = Integer.parseInt(get("game/join"));
     System.out.println("You are player " + playerId);
     opponentsId = playerId == 1 ? 2 : 1;
-    youTurn = playerId == 1;
+    yourTurn = false;
   }
 
-  private static boolean newMoveFromOpponent() {
+  private boolean newMoveFromOpponent() {
     int fetchOpponentsLastMoveId = fetchOpponentsLastMoveId();
     if (fetchOpponentsLastMoveId != savedOpponentsLastMoveId) {
       System.out.println("New move from opponent!");
@@ -221,12 +244,13 @@ public class Main {
     }
   }
 
-  private static int fetchOpponentsLastMoveId() {
-    return Integer.parseInt(get("http://hptcg-server.herokuapp.com/game/player" + opponentsId + "/lastMoveId"));
+  private int fetchOpponentsLastMoveId() {
+    return Integer.parseInt(get("game/player" + opponentsId + "/lastMoveId"));
   }
 
-  public static String get(String url) {
+  public String get(String uri) {
     String result = "";
+    String url = "http://hptcg-server.herokuapp.com/" + uri;
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
       result = br.readLine();
@@ -237,11 +261,29 @@ public class Main {
   }
 
   public void endYourTurn() {
-    youTurn = false;
+    yourTurn = false;
     mainMessageLabel.setText("It's your opponent's turn.");
+    refresh();
   }
 
   public void addMessage(String s) {
     gameMessagesPanel.append("\n" + s);
+  }
+
+  public int getPlayerId() {
+    return playerId;
+  }
+
+  public void removeFromHand(Card card) {
+    handPanel.remove(card);
+  }
+
+  public void addToPlayedCards(Card card) {
+    playedCards.add(card);
+  }
+
+  public void refresh() {
+    frame.repaint();
+    frame.pack();
   }
 }
