@@ -8,4 +8,6 @@ public interface ICard {
   boolean conditionFulfilled();
 
   void playCard();
+
+  void applyOpponentPlayed();
 }

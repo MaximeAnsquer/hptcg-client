@@ -1,6 +1,7 @@
 package hptcg;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -19,7 +20,7 @@ public abstract class Card extends JLabel implements ICard {
     super();
     this.game = game;
     this.cardName = cardName;
-    this.imageIcon = this.game.getImageIcon(cardName);
+    this.imageIcon = this.game.getImage(cardName, 1.0);
     setIcon(imageIcon);
     addMouseListener(new MouseListener() {
       @Override
@@ -53,6 +54,18 @@ public abstract class Card extends JLabel implements ICard {
 
   public String toString() {
     return name;
+  }
+
+  public void playCard() {
+    game.get("game/player" + game.getPlayerId() + "/play/" + cardName);
+    removeMouseListener(this.getMouseListeners()[0]);
+    game.removeFromHand(this);
+    game.addMessage("You played: " + cardName);
+    System.out.println("You played: " + cardName);
+  }
+
+  public void applyOpponentPlayed() {
+    removeMouseListener(this.getMouseListeners()[0]);
   }
 
 }

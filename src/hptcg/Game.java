@@ -29,8 +29,17 @@ public class Game {
   public boolean yourTurn;
   public static JTextArea gameMessagesPanel;
   public static JLabel mainMessageLabel;
+  private Map<LessonType, Integer> yourLessons;
+  private Map<LessonType, Integer> opponentsLessons;
+  private JLabel startingCharacter;
+  private Map<LessonType, JLabel> yourLessonsLabels;
+  private Map<LessonType, JLabel> opponentsLessonsLabels;
 
   public Game() {
+    opponentsLessonsLabels = new Hashtable<>();
+    yourLessonsLabels = new Hashtable<>();
+    yourLessons = yourLessons();
+    opponentsLessons = opponentsLessons();
     savedOpponentsLastMoveId = 0;
     cardsImageIcons = new Hashtable<>();
     frame = new JFrame("Harry Potter TCG");
@@ -40,9 +49,38 @@ public class Game {
     contentPane.add(handAndMainMessagePanels(), BorderLayout.SOUTH);
     contentPane.add(boardPanel(), BorderLayout.CENTER);
     contentPane.add(gameMessagesPanel(), BorderLayout.EAST);
+    contentPane.add(leftPanel(), BorderLayout.WEST);
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.pack();
     frame.setVisible(true);
+  }
+
+  private Map<LessonType, Integer> opponentsLessons() {
+    Hashtable<LessonType, Integer> result = new Hashtable<>();
+    for(LessonType lessonType: LessonType.values()) {
+      result.put(lessonType, 0);
+    }
+    return result;
+  }
+
+  private Map<LessonType, Integer> yourLessons() {
+    Hashtable<LessonType, Integer> result = new Hashtable<>();
+    for(LessonType lessonType: LessonType.values()) {
+      result.put(lessonType, 0);
+    }
+    return result;
+  }
+
+  private JPanel leftPanel() {
+    JPanel leftPanel = new JPanel(new BorderLayout());
+    JPanel bottom = new JPanel();
+    bottom.setLayout(new GridLayout(0, 1, 0, 0));
+    bottom.add(new JLabel("Deck:"));
+    bottom.add(new JLabel("Hand:"));
+    startingCharacter = new JLabel(getImage("character", 1));
+    bottom.add(startingCharacter);
+    leftPanel.add(bottom, BorderLayout.SOUTH);
+    return leftPanel;
   }
 
   private JPanel handAndMainMessagePanels() {
@@ -88,51 +126,98 @@ public class Game {
 
   private JPanel opponentsCards() {
     opponentsCards = new JPanel();
-    opponentsCards.setLayout(new BoxLayout(opponentsCards, BoxLayout.X_AXIS));
+    opponentsCards.setBackground(Color.GREEN);
+    opponentsCards.setLayout(new BoxLayout(opponentsCards, BoxLayout.Y_AXIS));
+    opponentsCards.add(opponentsLessonsPanel());
     return opponentsCards;
+  }
+
+  private JPanel opponentsLessonsPanel() {
+    JPanel opponentsLessonsPanel = new JPanel();
+    opponentsLessonsPanel.setLayout(new BoxLayout(opponentsLessonsPanel, BoxLayout.X_AXIS));
+    opponentsLessonsPanel.setBackground(Color.GREEN);
+    double scale = 0.70;
+    for(LessonType lessonType: LessonType.values()) {
+      JLabel lessonLabel = new JLabel(createImage(lessonType.toString(), scale));
+      lessonLabel.setVisible(false);
+      lessonLabel.setText("0");
+      lessonLabel.setVerticalTextPosition(JLabel.CENTER);
+      lessonLabel.setHorizontalTextPosition(JLabel.LEFT);
+      lessonLabel.setFont(new Font(Font.SERIF, Font.BOLD, 40));
+      opponentsLessonsPanel.add(lessonLabel);
+      opponentsLessonsLabels.put(lessonType, lessonLabel);
+    }
+    return opponentsLessonsPanel;
   }
 
   private JPanel playedCards() {
     playedCards = new JPanel();
     playedCards.setBackground(Color.GREEN);
-    playedCards.setLayout(new BoxLayout(playedCards, BoxLayout.X_AXIS));
+    playedCards.setLayout(new BoxLayout(playedCards, BoxLayout.Y_AXIS));
+    playedCards.add(yourLessonsPanel());
     return playedCards;
   }
 
-  private JPanel handPanel() {
-    handPanel = new JPanel();
-    handPanel.setPreferredSize(new Dimension(availableWidth, 125));
-    handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
-    handPanel.add(new Charms(this));
-    handPanel.add(new Transfiguration(this));
-    handPanel.add(new Charms(this));
-    handPanel.add(new Transfiguration(this));
-    handPanel.add(new Transfiguration(this));
-    handPanel.add(new Charms(this));
-    return handPanel;
+  private JPanel yourLessonsPanel() {
+    JPanel yourLessonsPanel = new JPanel();
+    yourLessonsPanel.setLayout(new BoxLayout(yourLessonsPanel, BoxLayout.X_AXIS));
+    yourLessonsPanel.setBackground(Color.GREEN);
+    double scale = 0.70;
+    for(LessonType lessonType: LessonType.values()) {
+      JLabel lessonLabel = new JLabel(createImage(lessonType.toString(), scale));
+      lessonLabel.setVisible(false);
+      lessonLabel.setText("0");
+      lessonLabel.setVerticalTextPosition(JLabel.CENTER);
+      lessonLabel.setHorizontalTextPosition(JLabel.LEFT);
+      lessonLabel.setFont(new Font(Font.SERIF, Font.BOLD, 40));
+      yourLessonsPanel.add(lessonLabel);
+      yourLessonsLabels.put(lessonType, lessonLabel);
+    }
+    return yourLessonsPanel;
   }
 
-  public ImageIcon getImageIcon(String cardName) {
+  private JScrollPane handPanel() {
+    handPanel = new JPanel();
+    handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
+    for (int i=0; i < 3; i++) {
+      handPanel.add(new Charms(this));
+      handPanel.add(new Potions(this));
+      handPanel.add(new Transfiguration(this));
+      handPanel.add(new CareOfMagicalCreatures(this));
+      handPanel.add(new Quidditch(this));
+    }
+    return new JScrollPane(handPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+  }
+
+  public ImageIcon getImage(String cardName, double scale) {
     ImageIcon imageIcon;
     if (cardsImageIcons.containsKey(cardName)) {
       imageIcon = cardsImageIcons.get(cardName);
     } else {
-      BufferedImage cardImage = null;
-      try {
-        cardImage = ImageIO.read(new File("src/hptcg/images/" + cardName + ".jpg"));
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      imageIcon = new ImageIcon(cardImage);
-      imageIcon = resizeImage(imageIcon);
+      imageIcon = createImage(cardName, scale);
       cardsImageIcons.put(cardName, imageIcon);
     }
     return imageIcon;
   }
 
-  private ImageIcon resizeImage(ImageIcon imageIcon) {
+  private ImageIcon createImage(String cardName, double scale) {
+    BufferedImage cardImage = null;
+    try {
+      cardImage = ImageIO.read(new File("src/hptcg/images/" + cardName + ".jpg"));
+    } catch (IOException e) {
+      System.out.println("cardName: " + cardName);
+      e.printStackTrace();
+    }
+    ImageIcon imageIcon = new ImageIcon(cardImage);
+    imageIcon = resizeImage(imageIcon, scale);
+    return imageIcon;
+  }
+
+  private ImageIcon resizeImage(ImageIcon imageIcon, double scale) {
     Image image = imageIcon.getImage();
-    Image newImage = image.getScaledInstance(175, 125,  java.awt.Image.SCALE_SMOOTH);
+    int width = (int) (scale * 175);
+    int height = (int) (scale * 125);
+    Image newImage = image.getScaledInstance(width, height,  java.awt.Image.SCALE_SMOOTH);
     return new ImageIcon(newImage);
   }
 
@@ -191,7 +276,8 @@ public class Game {
     String cardName = get("game/player" + opponentsId + "/lastCardPlayed");
     System.out.println("Opponent played: " + cardName);
     addMessage("Your opponent played: " + cardName);
-    opponentsCards.add(createCard(cardName));
+    Card opponentsCard = (Card) createCard(cardName);
+    opponentsCard.applyOpponentPlayed();
     refresh();
     beginYourTurn();
   }
@@ -278,12 +364,20 @@ public class Game {
     handPanel.remove(card);
   }
 
-  public void addToPlayedCards(Card card) {
-    playedCards.add(card);
-  }
-
   public void refresh() {
     frame.repaint();
     frame.pack();
+  }
+
+  public void addLesson(LessonType lessonType) {
+    yourLessons.put(lessonType, yourLessons.get(lessonType) + 1);
+    yourLessonsLabels.get(lessonType).setText(String.valueOf(yourLessons.get(lessonType)));
+    yourLessonsLabels.get(lessonType).setVisible(true);
+  }
+
+  public void addOpponentLesson(LessonType lessonType) {
+    opponentsLessons.put(lessonType, opponentsLessons.get(lessonType) + 1);
+    opponentsLessonsLabels.get(lessonType).setText(String.valueOf(opponentsLessons.get(lessonType)));
+    opponentsLessonsLabels.get(lessonType).setVisible(true);
   }
 }
