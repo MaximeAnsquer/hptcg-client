@@ -68,4 +68,8 @@ public abstract class Card extends JLabel implements ICard {
     removeMouseListener(this.getMouseListeners()[0]);
   }
 
+  public void setImageScale(double scale) {
+    setIcon(game.createImage(cardName, scale));
+  }
+
 }

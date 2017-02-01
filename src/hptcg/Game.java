@@ -30,17 +30,29 @@ public class Game {
     public static JLabel mainMessageLabel;
     private Map<LessonType, Integer> yourLessons;
     private Map<LessonType, Integer> opponentsLessons;
-    private JLabel startingCharacter;
     private Map<LessonType, JLabel> yourLessonsLabels;
     private Map<LessonType, JLabel> opponentsLessonsLabels;
+    private Card yourStartingCharacter;
+    private int yourDeckSize;
+    private int yourHandSize;
+    private Card opponentStartingCharacter;
+    private int opponentDeckSize;
+    private int opponentHandSize;
+
 
     public Game() {
+        yourDeckSize = 60;
+        yourHandSize = 7;
+        opponentDeckSize = 60;
+        opponentHandSize = 7;
+        cardsImageIcons = new Hashtable<>();
+        yourStartingCharacter = chooseStartingCharacter();
+        opponentStartingCharacter = opponentStartingCharacter();
         opponentsLessonsLabels = new Hashtable<>();
         yourLessonsLabels = new Hashtable<>();
         yourLessons = yourLessons();
         opponentsLessons = opponentsLessons();
         savedOpponentsLastMoveId = 0;
-        cardsImageIcons = new Hashtable<>();
         frame = new JFrame("Harry Potter TCG");
         setSize();
         Container contentPane = frame.getContentPane();
@@ -52,6 +64,25 @@ public class Game {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    private Card opponentStartingCharacter() {
+        Character emptyCharacter = new EmptyCharacter(this);
+        emptyCharacter.setIcon(null);
+        return emptyCharacter;
+    }
+
+    private Card chooseStartingCharacter() {
+        int choice = JOptionPane.showOptionDialog(frame, "Please choose your starting character",
+                "Startig Character",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new String[]{"Hermione Granger", "Draco Malfoy"},
+                "Hermione Granger");
+        Card character = choice == 0 ? new HermioneGranger(this) : new DracoMalfoy(this);
+        character.setImageScale(1.33);
+        return character;
     }
 
     private Map<LessonType, Integer> opponentsLessons() {
@@ -72,14 +103,26 @@ public class Game {
 
     private JPanel leftPanel() {
         JPanel leftPanel = new JPanel(new BorderLayout());
-        JPanel bottom = new JPanel();
-        bottom.setLayout(new GridLayout(0, 1, 0, 0));
-        bottom.add(new JLabel("Deck:"));
-        bottom.add(new JLabel("Hand:"));
-        startingCharacter = new JLabel(getImage("character", 1));
-        bottom.add(startingCharacter);
-        leftPanel.add(bottom, BorderLayout.SOUTH);
+        leftPanel.add(genericPlayerInfo(yourDeckSize, yourHandSize, yourStartingCharacter), BorderLayout.SOUTH);
+        leftPanel.add(genericPlayerInfo(opponentDeckSize, opponentHandSize, opponentStartingCharacter), BorderLayout.NORTH);
         return leftPanel;
+    }
+
+    private JPanel genericPlayerInfo(int playerDeckSize, int playerHandSize, Card playerStartingCharacter) {
+        JPanel playerInfoPanel = new JPanel();
+        playerInfoPanel.setLayout(new BoxLayout(playerInfoPanel, BoxLayout.Y_AXIS));
+        playerInfoPanel.add(genericPlayerDeckLabel(playerDeckSize));
+        playerInfoPanel.add(genericPlayerHandLabel(playerHandSize));
+        playerInfoPanel.add(playerStartingCharacter);
+        return playerInfoPanel;
+    }
+
+    private JLabel genericPlayerHandLabel(int playerHandSize) {
+        return new JLabel("Deck: " + playerHandSize);
+    }
+
+    private JLabel genericPlayerDeckLabel(int playerDeckSize) {
+        return new JLabel("Deck: " + playerDeckSize);
     }
 
     private JPanel handAndMainMessagePanels() {
@@ -115,9 +158,7 @@ public class Game {
     }
 
     private JPanel boardPanel() {
-        boardPanel = new JPanel();
-        boardPanel.setLayout(new BorderLayout());
-        boardPanel.setBackground(Color.GREEN);
+        boardPanel = new BoardPanel();
         boardPanel.add(createGenericPlayedCardsPanel(yourPlayedCard, yourLessonsLabels), BorderLayout.SOUTH);
         boardPanel.add(createGenericPlayedCardsPanel(opponentsCards, opponentsLessonsLabels), BorderLayout.NORTH);
         return boardPanel;
@@ -126,12 +167,12 @@ public class Game {
     private JPanel createGenericLessonPanel(Map<LessonType, JLabel> playersLessonsLabels) {
         JPanel opponentsLessonsPanel = new JPanel();
         opponentsLessonsPanel.setLayout(new BoxLayout(opponentsLessonsPanel, BoxLayout.X_AXIS));
-        opponentsLessonsPanel.setBackground(Color.GREEN);
+        opponentsLessonsPanel.setOpaque(false);
         double scale = 0.70;
         for(LessonType lessonType: LessonType.values()) {
             JLabel lessonLabel = new JLabel(createImage(lessonType.toString(), scale));
             lessonLabel.setVisible(false);
-            lessonLabel.setText("0");
+            lessonLabel.setForeground(Color.WHITE);
             lessonLabel.setVerticalTextPosition(JLabel.CENTER);
             lessonLabel.setHorizontalTextPosition(JLabel.LEFT);
             lessonLabel.setFont(new Font(Font.SERIF, Font.BOLD, 40));
@@ -143,7 +184,7 @@ public class Game {
 
     private JPanel createGenericPlayedCardsPanel(JPanel playerPlayedCards, Map<LessonType, JLabel> playerLessonsLabels) {
         playerPlayedCards = new JPanel();
-        playerPlayedCards.setBackground(Color.GREEN);
+        playerPlayedCards.setOpaque(false);
         playerPlayedCards.setLayout(new BoxLayout(playerPlayedCards, BoxLayout.Y_AXIS));
         playerPlayedCards.add(createGenericLessonPanel(playerLessonsLabels));
         return playerPlayedCards;
@@ -173,7 +214,7 @@ public class Game {
         return imageIcon;
     }
 
-    private ImageIcon createImage(String cardName, double scale) {
+    public ImageIcon createImage(String cardName, double scale) {
         BufferedImage cardImage = null;
         try {
             cardImage = ImageIO.read(new File("src/hptcg/images/" + cardName + ".jpg"));
