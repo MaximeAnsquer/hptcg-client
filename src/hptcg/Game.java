@@ -4,10 +4,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
@@ -21,9 +19,11 @@ public class Game {
     public JPanel opponentsCards;
     private Map<String, ImageIcon> cardsImageIcons;
     private static int savedOpponentsLastMoveId;
-    private int playerId;
-    private static int opponentsId;
+    private int yourId;
+    private static int opponentId;
     public static int availableWidth;
+
+
     public static int availableHeight;
     public boolean yourTurn;
     public static JTextArea gameMessagesPanel;
@@ -38,6 +38,9 @@ public class Game {
     private Card opponentStartingCharacter;
     private int opponentDeckSize;
     private int opponentHandSize;
+    private String serverUrl = "http://localhost:8080/";
+    private JPanel leftPanel;
+//    private String serverUrl = "http://hptcg-server.herokuapp.com/";
 
 
     public Game() {
@@ -81,7 +84,7 @@ public class Game {
                 new String[]{"Hermione Granger", "Draco Malfoy"},
                 "Hermione Granger");
         Card character = choice == 0 ? new HermioneGranger(this) : new DracoMalfoy(this);
-        character.setImageScale(1.33);
+        character.setImageScale(1.25);
         return character;
     }
 
@@ -102,9 +105,8 @@ public class Game {
     }
 
     private JPanel leftPanel() {
-        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(genericPlayerInfo(yourDeckSize, yourHandSize, yourStartingCharacter), BorderLayout.SOUTH);
-        leftPanel.add(genericPlayerInfo(opponentDeckSize, opponentHandSize, opponentStartingCharacter), BorderLayout.NORTH);
         return leftPanel;
     }
 
@@ -118,7 +120,7 @@ public class Game {
     }
 
     private JLabel genericPlayerHandLabel(int playerHandSize) {
-        return new JLabel("Deck: " + playerHandSize);
+        return new JLabel("Hand: " + playerHandSize);
     }
 
     private JLabel genericPlayerDeckLabel(int playerDeckSize) {
@@ -195,6 +197,7 @@ public class Game {
         handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
         for (int i=0; i < 3; i++) {
             handPanel.add(new Charms(this));
+            handPanel.add(new Avifors(this));
             handPanel.add(new Potions(this));
             handPanel.add(new Transfiguration(this));
             handPanel.add(new CareOfMagicalCreatures(this));
@@ -214,6 +217,10 @@ public class Game {
         return imageIcon;
     }
 
+    public Map<LessonType, Integer> getOpponentsLessons() {
+        return opponentsLessons;
+    }
+
     public ImageIcon createImage(String cardName, double scale) {
         BufferedImage cardImage = null;
         try {
@@ -228,31 +235,12 @@ public class Game {
     }
 
     private ImageIcon resizeImage(ImageIcon imageIcon, double scale) {
+        scale = scale * 0.5;
         Image image = imageIcon.getImage();
-        int width = (int) (scale * 175);
-        int height = (int) (scale * 125);
+        int width = (int) (image.getWidth(null) * scale);
+        int height = (int) (image.getHeight(null) * scale);
         Image newImage = image.getScaledInstance(width, height,  java.awt.Image.SCALE_SMOOTH);
         return new ImageIcon(newImage);
-    }
-
-    public static void main(String[] args) {
-
-        Game game = new Game();
-
-        game.connectToServer();
-        game.waitForOpponent();
-
-        while(true) {
-            waitFor(100);  // delay so that the yourTurn variable knows it changed
-            while(!game.itsYourTurn()) {
-                if(game.newMoveFromOpponent()) {
-                    System.out.println("newMoveFromOpponent returns true");
-                    game.applyOpponentsMove();
-                }
-                waitFor(1000);
-            }
-        }
-
     }
 
     private boolean itsYourTurn() {
@@ -264,10 +252,15 @@ public class Game {
         System.out.println("Waiting for an opponent to connect to the server...");
         mainMessageLabel.setText("Waiting for an opponent");
         while(waiting) {
-            if(get("game/player" + opponentsId + "/status").equals("connected")) {
+            if(get("game/player" + opponentId + "/status").equals("connected")) {
                 waiting = false;
                 System.out.println("An opponent joined the game!");
-                yourTurn = playerId == 1;
+                yourTurn = yourId == 1;
+                waitFor(1000);
+                String opponentCharacterName = get("game/player" + opponentId + "/startingCharacter");
+                System.out.println("opponentCharacterName: " + opponentCharacterName);
+                createOpponent(opponentCharacterName);
+                this.refresh();
                 if(yourTurn) {
                     mainMessageLabel.setText("It's your turn");
                 } else {
@@ -275,6 +268,12 @@ public class Game {
                 }
             }
         }
+    }
+
+    private void createOpponent(String opponentCharacterName) {
+        opponentStartingCharacter = createCard(opponentCharacterName);
+        opponentStartingCharacter.setImageScale(1.25);
+        leftPanel.add(genericPlayerInfo(opponentDeckSize, opponentHandSize, opponentStartingCharacter), BorderLayout.NORTH);
     }
 
     private static void waitFor(int i) {
@@ -286,8 +285,7 @@ public class Game {
     }
 
     private void applyOpponentsMove() {
-        System.out.println("Applying opponent's move");
-        String cardName = get("game/player" + opponentsId + "/lastCardPlayed");
+        String cardName = get("game/player" + opponentId + "/lastCardPlayed");
         System.out.println("Opponent played: " + cardName);
         addMessage("Your opponent played: " + cardName);
         Card opponentsCard = createCard(cardName);
@@ -328,9 +326,10 @@ public class Game {
             waitFor(1000);
             connectToServer();
         } else {
-            playerId = Integer.parseInt(connectionResult);
-            System.out.println("You are player " + playerId);
-            opponentsId = playerId == 1 ? 2 : 1;
+            yourId = Integer.parseInt(connectionResult);
+            System.out.println("You are player " + yourId);
+            put("game/player" + yourId + "/startingCharacter", yourStartingCharacter.getCardName());
+            opponentId = yourId == 1 ? 2 : 1;
             yourTurn = false;
         }
     }
@@ -347,12 +346,12 @@ public class Game {
     }
 
     private int fetchOpponentsLastMoveId() {
-        return Integer.parseInt(get("game/player" + opponentsId + "/lastMoveId"));
+        return Integer.parseInt(get("game/player" + opponentId + "/lastMoveId"));
     }
 
     public String get(String uri) {
         String result = "";
-        String url = "http://hptcg-server.herokuapp.com/" + uri;
+        String url = serverUrl + uri;
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
             result = br.readLine();
@@ -360,6 +359,21 @@ public class Game {
             ex.printStackTrace();
         }
         return result;
+    }
+
+    public void put(String uri, String payload) {
+        try {
+            URL url = new URL(serverUrl + uri);
+            HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+            httpCon.setDoOutput(true);
+            httpCon.setRequestMethod("PUT");
+            OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
+            out.write(payload);
+            out.close();
+            httpCon.getInputStream();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void endYourTurn() {
@@ -372,8 +386,16 @@ public class Game {
         gameMessagesPanel.append("\n" + s);
     }
 
-    public int getPlayerId() {
-        return playerId;
+    public int getYourId() {
+        return yourId;
+    }
+
+    public Map<LessonType, JLabel> getYourLessonsLabels() {
+        return yourLessonsLabels;
+    }
+
+    public Map<LessonType, JLabel> getOpponentsLessonsLabels() {
+        return opponentsLessonsLabels;
     }
 
     public void removeFromHand(Card card) {
@@ -396,4 +418,24 @@ public class Game {
         opponentsLessonsLabels.get(lessonType).setText(String.valueOf(opponentsLessons.get(lessonType)));
         opponentsLessonsLabels.get(lessonType).setVisible(true);
     }
+
+    public static void main(String[] args) {
+
+        Game game = new Game();
+
+        game.connectToServer();
+        game.waitForOpponent();
+
+        while(true) {
+            waitFor(100);  // delay so that the yourTurn variable knows it changed
+            while(!game.itsYourTurn()) {
+                if(game.newMoveFromOpponent()) {
+                    game.applyOpponentsMove();
+                }
+                waitFor(1000);
+            }
+        }
+
+    }
+
 }

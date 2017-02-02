@@ -7,7 +7,7 @@ public class HermioneGranger extends Character {
     }
 
     @Override
-    public boolean conditionFulfilled() {
+    public boolean canBePlayed() {
         return true;
     }
 }

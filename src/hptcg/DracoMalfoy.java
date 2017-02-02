@@ -7,7 +7,7 @@ public class DracoMalfoy extends Character {
     }
 
     @Override
-    public boolean conditionFulfilled() {
+    public boolean canBePlayed() {
         return true;
     }
 }

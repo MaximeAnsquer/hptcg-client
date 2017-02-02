@@ -10,12 +10,12 @@ public abstract class Lesson extends Card {
 
   protected Lesson(Game game, String cardName) {
     super(game, cardName);
-    cost = 0;
+    powerNeeded = 0;
     type = Type.LESSON;
     text = "";
   }
 
-  public boolean conditionFulfilled() {
+  public boolean canBePlayed() {
     return true;
   }
 
@@ -25,8 +25,6 @@ public abstract class Lesson extends Card {
     Image newImage = image.getScaledInstance(88, 63,  java.awt.Image.SCALE_SMOOTH);
     setIcon(new ImageIcon(newImage));
     game.addLesson(lessonType);
-    game.refresh();
-    game.endYourTurn(); //TODO: Remove
   }
 
   public void applyOpponentPlayed() {

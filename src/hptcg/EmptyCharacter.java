@@ -7,7 +7,7 @@ public class EmptyCharacter extends Character {
     }
 
     @Override
-    public boolean conditionFulfilled() {
+    public boolean canBePlayed() {
         return false;
     }
 }
