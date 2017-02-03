@@ -9,15 +9,15 @@ public abstract class Card extends JLabel implements ICard {
     protected int powerNeeded;
 
 
-    public LessonType getLessonTypeNeeded() {
-        return lessonTypeNeeded;
+    public LessonType getPowerTypeNeeded() {
+        return powerTypeNeeded;
     }
 
-    public void setLessonTypeNeeded(LessonType lessonTypeNeeded) {
-        this.lessonTypeNeeded = lessonTypeNeeded;
+    public void setPowerTypeNeeded(LessonType powerTypeNeeded) {
+        this.powerTypeNeeded = powerTypeNeeded;
     }
 
-    protected LessonType lessonTypeNeeded;
+    protected LessonType powerTypeNeeded;
     protected Edition edition;
     protected String text;
     protected Type type;

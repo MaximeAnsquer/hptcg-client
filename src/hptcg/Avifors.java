@@ -1,28 +1,28 @@
 package hptcg;
 
 import static hptcg.LessonType.CARE_OF_MAGICAL_CREATURES;
+import static hptcg.LessonType.TRANSFIGURATION;
 
 public class Avifors extends Spell {
 
     public Avifors(Game game) {
         super(game, "Avifors");
+        powerNeeded = 2;
+        powerTypeNeeded = TRANSFIGURATION;
     }
 
     public void playCard() {
         super.playCard();
-        game.getOpponentsLessons().put(CARE_OF_MAGICAL_CREATURES, game.getOpponentsLessons().get(CARE_OF_MAGICAL_CREATURES) -1);
-        game.getOpponentsLessonsLabels().get(CARE_OF_MAGICAL_CREATURES).setText(String.valueOf(game.getOpponentsLessons().get(CARE_OF_MAGICAL_CREATURES)));
-        if (game.getOpponentsLessons().get(CARE_OF_MAGICAL_CREATURES) == 0 ) {
-            game.getOpponentsLessonsLabels().get(CARE_OF_MAGICAL_CREATURES).setVisible(false);
-        }
+        game.removeLesson(CARE_OF_MAGICAL_CREATURES, true);
     }
 
-    public void opponentPlayedCard() {
-
+    public void applyOpponentPlayed() {
+        super.applyOpponentPlayed();
+        game.removeLesson(CARE_OF_MAGICAL_CREATURES, false);
     }
 
     @Override
     public boolean canBePlayed() {
-        return game.getOpponentsLessons().get(CARE_OF_MAGICAL_CREATURES) > 0;
+        return super.canBePlayed() && game.getOpponentsLessons().get(CARE_OF_MAGICAL_CREATURES) > 0;
     }
 }

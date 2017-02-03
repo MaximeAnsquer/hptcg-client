@@ -3,6 +3,8 @@ package hptcg;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -22,8 +24,6 @@ public class Game {
     private int yourId;
     private static int opponentId;
     public static int availableWidth;
-
-
     public static int availableHeight;
     public boolean yourTurn;
     public static JTextArea gameMessagesPanel;
@@ -38,10 +38,15 @@ public class Game {
     private Card opponentStartingCharacter;
     private int opponentDeckSize;
     private int opponentHandSize;
-    private String serverUrl = "http://localhost:8080/";
     private JPanel leftPanel;
 //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
-
+    private String serverUrl = "http://localhost:8080/";
+    Map<LessonType, Integer> totalPower;
+    JLabel lastSpellPlayedLabel;
+    JPanel yourDiscardPile;
+    JPanel opponentDiscardPile;
+    JFrame yourDiscardPileFrame;
+    JFrame opponentDiscardPileFrame;
 
     public Game() {
         yourDeckSize = 60;
@@ -55,6 +60,11 @@ public class Game {
         yourLessonsLabels = new Hashtable<>();
         yourLessons = yourLessons();
         opponentsLessons = opponentsLessons();
+        totalPower = totalPower();
+        yourDiscardPile = createDiscardPile();
+        opponentDiscardPile = createDiscardPile();
+        yourDiscardPileFrame = discardPileFrame(yourDiscardPile);
+        opponentDiscardPileFrame = discardPileFrame(opponentDiscardPile);
         savedOpponentsLastMoveId = 0;
         frame = new JFrame("Harry Potter TCG");
         setSize();
@@ -67,6 +77,29 @@ public class Game {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    private JFrame discardPileFrame(JPanel discardPile) {
+        JFrame frame = new JFrame("Your discard pile");
+        Container contentPane = frame.getContentPane();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+        contentPane.add(discardPile);
+        frame.setLocationRelativeTo(null);
+        return frame;
+    }
+
+    private JPanel createDiscardPile() {
+        JPanel discardPile = new JPanel();
+        discardPile.setLayout(new BoxLayout(discardPile, BoxLayout.Y_AXIS));
+        return discardPile;
+    }
+
+    private Map<LessonType, Integer> totalPower() {
+        Map<LessonType, Integer> result = new Hashtable<>();
+        for (LessonType lessonType: LessonType.values()) {
+            result.put(lessonType, 0);
+        }
+        return result;
     }
 
     private Card opponentStartingCharacter() {
@@ -106,17 +139,37 @@ public class Game {
 
     private JPanel leftPanel() {
         leftPanel = new JPanel(new BorderLayout());
-        leftPanel.add(genericPlayerInfo(yourDeckSize, yourHandSize, yourStartingCharacter), BorderLayout.SOUTH);
+        leftPanel.add(lastSpellPlayedLabel());
+        leftPanel.add(genericPlayerInfo(yourDeckSize, yourHandSize, yourStartingCharacter, yourDiscardPileFrame), BorderLayout.SOUTH);
         return leftPanel;
     }
 
-    private JPanel genericPlayerInfo(int playerDeckSize, int playerHandSize, Card playerStartingCharacter) {
+    private JLabel lastSpellPlayedLabel() {
+        lastSpellPlayedLabel = new JLabel();
+        return lastSpellPlayedLabel;
+    }
+
+    private JPanel genericPlayerInfo(int playerDeckSize, int playerHandSize, Card playerStartingCharacter, JFrame playerDiscardPileFrame) {
         JPanel playerInfoPanel = new JPanel();
         playerInfoPanel.setLayout(new BoxLayout(playerInfoPanel, BoxLayout.Y_AXIS));
+        playerInfoPanel.add(discardPileButton(playerDiscardPileFrame));
         playerInfoPanel.add(genericPlayerDeckLabel(playerDeckSize));
         playerInfoPanel.add(genericPlayerHandLabel(playerHandSize));
         playerInfoPanel.add(playerStartingCharacter);
         return playerInfoPanel;
+    }
+
+    private JButton discardPileButton(JFrame playerDiscardPileFrame) {
+        JButton button = new JButton("Discard pile");
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerDiscardPileFrame.repaint();
+                playerDiscardPileFrame.pack();
+                playerDiscardPileFrame.setVisible(true);
+            }
+        });
+        return button;
     }
 
     private JLabel genericPlayerHandLabel(int playerHandSize) {
@@ -234,7 +287,7 @@ public class Game {
         return imageIcon;
     }
 
-    private ImageIcon resizeImage(ImageIcon imageIcon, double scale) {
+    public ImageIcon resizeImage(ImageIcon imageIcon, double scale) {
         scale = scale * 0.5;
         Image image = imageIcon.getImage();
         int width = (int) (image.getWidth(null) * scale);
@@ -273,7 +326,7 @@ public class Game {
     private void createOpponent(String opponentCharacterName) {
         opponentStartingCharacter = createCard(opponentCharacterName);
         opponentStartingCharacter.setImageScale(1.25);
-        leftPanel.add(genericPlayerInfo(opponentDeckSize, opponentHandSize, opponentStartingCharacter), BorderLayout.NORTH);
+        leftPanel.add(genericPlayerInfo(opponentDeckSize, opponentHandSize, opponentStartingCharacter, opponentDiscardPileFrame), BorderLayout.NORTH);
     }
 
     private static void waitFor(int i) {
@@ -409,14 +462,120 @@ public class Game {
 
     public void addLesson(LessonType lessonType) {
         yourLessons.put(lessonType, yourLessons.get(lessonType) + 1);
+        totalPower.put(lessonType, totalPower.get(lessonType) + 1);
         yourLessonsLabels.get(lessonType).setText(String.valueOf(yourLessons.get(lessonType)));
         yourLessonsLabels.get(lessonType).setVisible(true);
+    }
+
+    public void removeLesson(LessonType lessonType, boolean opponent) {
+        if (opponent) {
+            getOpponentsLessons().put(lessonType, getOpponentsLessons().get(lessonType) -1);
+            getOpponentsLessonsLabels().get(lessonType).setText(String.valueOf(getOpponentsLessons().get(lessonType)));
+            if (getOpponentsLessons().get(lessonType) == 0 ) {
+                getOpponentsLessonsLabels().get(lessonType).setVisible(false);
+            }
+        } else {
+            totalPower.put(lessonType, totalPower.get(lessonType) -1);
+            getYourLessons().put(lessonType, getYourLessons().get(lessonType) -1);
+            getYourLessonsLabels().get(lessonType).setText(String.valueOf(getYourLessons().get(lessonType)));
+            if (getYourLessons().get(lessonType) == 0 ) {
+                getYourLessonsLabels().get(lessonType).setVisible(false);
+            }
+        }
     }
 
     public void addOpponentLesson(LessonType lessonType) {
         opponentsLessons.put(lessonType, opponentsLessons.get(lessonType) + 1);
         opponentsLessonsLabels.get(lessonType).setText(String.valueOf(opponentsLessons.get(lessonType)));
         opponentsLessonsLabels.get(lessonType).setVisible(true);
+    }
+
+    public JFrame getFrame() {
+        return frame;
+    }
+
+    public JPanel getHandPanel() {
+        return handPanel;
+    }
+
+    public JPanel getBoardPanel() {
+        return boardPanel;
+    }
+
+    public JPanel getYourPlayedCard() {
+        return yourPlayedCard;
+    }
+
+    public JPanel getOpponentsCards() {
+        return opponentsCards;
+    }
+
+    public Map<String, ImageIcon> getCardsImageIcons() {
+        return cardsImageIcons;
+    }
+
+    public static int getSavedOpponentsLastMoveId() {
+        return savedOpponentsLastMoveId;
+    }
+
+    public static int getOpponentId() {
+        return opponentId;
+    }
+
+    public static int getAvailableWidth() {
+        return availableWidth;
+    }
+
+    public static int getAvailableHeight() {
+        return availableHeight;
+    }
+
+    public boolean isYourTurn() {
+        return yourTurn;
+    }
+
+    public static JTextArea getGameMessagesPanel() {
+        return gameMessagesPanel;
+    }
+
+    public static JLabel getMainMessageLabel() {
+        return mainMessageLabel;
+    }
+
+    public Map<LessonType, Integer> getYourLessons() {
+        return yourLessons;
+    }
+
+    public Card getYourStartingCharacter() {
+        return yourStartingCharacter;
+    }
+
+    public int getYourDeckSize() {
+        return yourDeckSize;
+    }
+
+    public int getYourHandSize() {
+        return yourHandSize;
+    }
+
+    public Card getOpponentStartingCharacter() {
+        return opponentStartingCharacter;
+    }
+
+    public int getOpponentDeckSize() {
+        return opponentDeckSize;
+    }
+
+    public int getOpponentHandSize() {
+        return opponentHandSize;
+    }
+
+    public JPanel getLeftPanel() {
+        return leftPanel;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
     }
 
     public static void main(String[] args) {
