@@ -12,7 +12,7 @@ public abstract class Lesson extends Card {
     super(game, cardName);
     powerNeeded = 0;
     type = Type.LESSON;
-    text = "";
+    cardText = "";
   }
 
   public boolean canBePlayed() {

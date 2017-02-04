@@ -28,8 +28,8 @@ public class Game {
     public boolean yourTurn;
     public static JTextArea gameMessagesPanel;
     public static JLabel mainMessageLabel;
-    private Map<LessonType, Integer> yourLessons;
-    private Map<LessonType, Integer> opponentsLessons;
+    Map<LessonType, Integer> yourLessons;
+    Map<LessonType, Integer> opponentsLessons;
     private Map<LessonType, JLabel> yourLessonsLabels;
     private Map<LessonType, JLabel> opponentsLessonsLabels;
     private Card yourStartingCharacter;
@@ -39,7 +39,7 @@ public class Game {
     private int opponentDeckSize;
     private int opponentHandSize;
     private JPanel leftPanel;
-//    private String serverUrl = "http://hptcg-server.herokuapp.com/";
+    //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
     private String serverUrl = "http://localhost:8080/";
     Map<LessonType, Integer> totalPower;
     JLabel lastSpellPlayedLabel;
@@ -47,6 +47,8 @@ public class Game {
     JPanel opponentDiscardPile;
     JFrame yourDiscardPileFrame;
     JFrame opponentDiscardPileFrame;
+    JPanel yourCreaturesPanel;
+    JPanel opponentCreaturesPanel;
 
     public Game() {
         yourDeckSize = 60;
@@ -65,6 +67,8 @@ public class Game {
         opponentDiscardPile = createDiscardPile();
         yourDiscardPileFrame = discardPileFrame(yourDiscardPile);
         opponentDiscardPileFrame = discardPileFrame(opponentDiscardPile);
+        yourCreaturesPanel = creaturePanel();
+        opponentCreaturesPanel = creaturePanel();
         savedOpponentsLastMoveId = 0;
         frame = new JFrame("Harry Potter TCG");
         setSize();
@@ -79,11 +83,21 @@ public class Game {
         frame.setVisible(true);
     }
 
+    private JPanel creaturePanel() {
+        JPanel panel = new JPanel();
+        panel.setOpaque(false);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        return panel;
+    }
+
     private JFrame discardPileFrame(JPanel discardPile) {
-        JFrame frame = new JFrame("Your discard pile");
+        String title = discardPile == yourDiscardPile ? "Your discard pile" : "Opponen'ts discard pile";
+        JFrame frame = new JFrame(title);
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
         contentPane.add(discardPile);
+        frame.setMinimumSize(new Dimension(390, 0));
+        frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         return frame;
     }
@@ -214,16 +228,16 @@ public class Game {
 
     private JPanel boardPanel() {
         boardPanel = new BoardPanel();
-        boardPanel.add(createGenericPlayedCardsPanel(yourPlayedCard, yourLessonsLabels), BorderLayout.SOUTH);
-        boardPanel.add(createGenericPlayedCardsPanel(opponentsCards, opponentsLessonsLabels), BorderLayout.NORTH);
+        boardPanel.add(createPlayedCardsPanel(yourPlayedCard, yourLessonsLabels, yourCreaturesPanel), BorderLayout.SOUTH);
+        boardPanel.add(createPlayedCardsPanel(opponentsCards, opponentsLessonsLabels, opponentCreaturesPanel), BorderLayout.NORTH);
         return boardPanel;
     }
 
-    private JPanel createGenericLessonPanel(Map<LessonType, JLabel> playersLessonsLabels) {
+    private JPanel createLessonPanel(Map<LessonType, JLabel> playersLessonsLabels) {
         JPanel opponentsLessonsPanel = new JPanel();
         opponentsLessonsPanel.setLayout(new BoxLayout(opponentsLessonsPanel, BoxLayout.X_AXIS));
         opponentsLessonsPanel.setOpaque(false);
-        double scale = 0.70;
+        double scale = 1;
         for(LessonType lessonType: LessonType.values()) {
             JLabel lessonLabel = new JLabel(createImage(lessonType.toString(), scale));
             lessonLabel.setVisible(false);
@@ -237,11 +251,26 @@ public class Game {
         return opponentsLessonsPanel;
     }
 
-    private JPanel createGenericPlayedCardsPanel(JPanel playerPlayedCards, Map<LessonType, JLabel> playerLessonsLabels) {
+    private JPanel createPlayedCardsPanel(JPanel playerPlayedCards, Map<LessonType, JLabel> playerLessonsLabels, JPanel playerCreatures) {
         playerPlayedCards = new JPanel();
         playerPlayedCards.setOpaque(false);
         playerPlayedCards.setLayout(new BoxLayout(playerPlayedCards, BoxLayout.Y_AXIS));
-        playerPlayedCards.add(createGenericLessonPanel(playerLessonsLabels));
+        playerPlayedCards.setAlignmentY(Container.TOP_ALIGNMENT);
+        playerPlayedCards.add(createLessonPanel(playerLessonsLabels));
+        JPanel centeringPanel = new JPanel(new GridBagLayout());
+        centeringPanel.add(playerCreatures);
+        centeringPanel.setOpaque(false);
+        centeringPanel.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
+        JScrollPane creaturesScrollPane = new JScrollPane(centeringPanel);
+        creaturesScrollPane.getViewport().setOpaque(false);
+        creaturesScrollPane.setOpaque(false);
+        creaturesScrollPane.setAlignmentX(Container.CENTER_ALIGNMENT);
+        creaturesScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        if (playerCreatures == yourCreaturesPanel) {
+            playerPlayedCards.add(creaturesScrollPane, 0);
+        } else {
+            playerPlayedCards.add(creaturesScrollPane);
+        }
         return playerPlayedCards;
     }
 
@@ -252,7 +281,9 @@ public class Game {
             handPanel.add(new Charms(this));
             handPanel.add(new Avifors(this));
             handPanel.add(new Potions(this));
+            handPanel.add(new CuriousRaven(this));
             handPanel.add(new Transfiguration(this));
+            handPanel.add(new Epoximise(this));
             handPanel.add(new CareOfMagicalCreatures(this));
             handPanel.add(new Quidditch(this));
         }
@@ -474,6 +505,7 @@ public class Game {
             if (getOpponentsLessons().get(lessonType) == 0 ) {
                 getOpponentsLessonsLabels().get(lessonType).setVisible(false);
             }
+            opponentDiscardPile.add(createCard(lessonType.toString()));
         } else {
             totalPower.put(lessonType, totalPower.get(lessonType) -1);
             getYourLessons().put(lessonType, getYourLessons().get(lessonType) -1);
@@ -481,6 +513,7 @@ public class Game {
             if (getYourLessons().get(lessonType) == 0 ) {
                 getYourLessonsLabels().get(lessonType).setVisible(false);
             }
+            yourDiscardPile.add(createCard(lessonType.toString()));
         }
     }
 

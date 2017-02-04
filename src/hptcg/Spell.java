@@ -10,7 +10,6 @@ public abstract class Spell extends Card {
         super.playCard();
         game.lastSpellPlayedLabel.setIcon(game.resizeImage(imageIcon, 3));
         game.yourDiscardPileFrame.getContentPane().add(this);
-        this.removeMouseListener(this.getMouseListeners()[0]);
     }
 
     public void applyOpponentPlayed() {
