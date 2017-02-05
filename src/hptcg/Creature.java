@@ -10,8 +10,8 @@ public class Creature extends Card {
     protected int health;
     protected int lessonsToDiscard;
 
-    protected Creature(Game game, String cardName, int powerNeeded, int damage, int health, int lessonsToDiscard) {
-        super(game, cardName);
+    protected Creature(Game game, int powerNeeded, int damage, int health, int lessonsToDiscard) {
+        super(game);
         this.damage = damage;
         this.health = health;
         this.lessonsToDiscard = lessonsToDiscard;

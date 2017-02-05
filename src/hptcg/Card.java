@@ -27,6 +27,16 @@ public abstract class Card extends JLabel implements ICard {
     protected Game game;
     protected String cardName;
 
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    protected boolean disabled = false;
+
     public int getPowerNeeded() {
         return powerNeeded;
     }
@@ -76,25 +86,19 @@ public abstract class Card extends JLabel implements ICard {
         return cardName;
     }
 
-    public void setCardName(String cardName) {
-        this.cardName = cardName;
-    }
 
-    protected Card(Game game, String cardName) {
+    protected Card(Game game) {
         super();
         this.game = game;
-        this.cardName = cardName;
+        this.cardName = this.getClass().getSimpleName();
         this.imageIcon = this.game.getImage(cardName, 1.0);
         setIcon(imageIcon);
+        setToolTipText("<html><img src=\"file:"+new File("src/hptcg/images/" + cardName + ".jpg").toString()+"\">");
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (game.yourTurn && canBePlayed()) {
+                if (game.yourTurn && canBePlayed() && !disabled) {
                     playCard();
-                    String path = new File("src/hptcg/images/" + cardName + ".jpg").getAbsolutePath();
-                    System.out.println("path: " + path);
-                    URL url = getClass().getResource(path);
-                    setToolTipText("<html><body><img src='" + url + "'></body></html>");
                 }
             }
 

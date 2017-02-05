@@ -3,7 +3,7 @@ package hptcg;
 public class Quidditch extends Lesson {
 
   public Quidditch(Game game) {
-    super(game, "Quidditch");
+    super(game);
     this.lessonType = LessonType.QUIDDITCH;
   }
 

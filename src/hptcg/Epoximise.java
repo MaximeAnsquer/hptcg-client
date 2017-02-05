@@ -6,9 +6,7 @@ import static hptcg.LessonType.TRANSFIGURATION;
 public class Epoximise extends Spell {
 
     public Epoximise(Game game) {
-        super(game, "Epoximise");
-        powerNeeded = 2;
-        powerTypeNeeded = TRANSFIGURATION;
+        super(game, 2, TRANSFIGURATION);
     }
 
     public void playCard() {

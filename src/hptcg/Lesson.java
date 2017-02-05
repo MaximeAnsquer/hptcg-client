@@ -8,8 +8,8 @@ public abstract class Lesson extends Card {
 
   protected LessonType lessonType;
 
-  protected Lesson(Game game, String cardName) {
-    super(game, cardName);
+  protected Lesson(Game game) {
+    super(game);
     powerNeeded = 0;
     type = Type.LESSON;
     cardText = "";

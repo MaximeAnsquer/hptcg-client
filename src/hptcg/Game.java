@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class Game {
     public static int availableHeight;
     public boolean yourTurn;
     public static JTextArea gameMessagesPanel;
-    public static JLabel mainMessageLabel;
+    JLabel mainMessageLabel;
     Map<LessonType, Integer> yourLessons;
     Map<LessonType, Integer> opponentsLessons;
     private Map<LessonType, JLabel> yourLessonsLabels;
@@ -280,6 +281,7 @@ public class Game {
         for (int i=0; i < 3; i++) {
             handPanel.add(new Charms(this));
             handPanel.add(new Avifors(this));
+            handPanel.add(new Incarcifors(this));
             handPanel.add(new Potions(this));
             handPanel.add(new CuriousRaven(this));
             handPanel.add(new Transfiguration(this));
@@ -310,7 +312,6 @@ public class Game {
         try {
             cardImage = ImageIO.read(new File("src/hptcg/images/" + cardName + ".jpg"));
         } catch (IOException e) {
-            System.out.println("cardName: " + cardName);
             e.printStackTrace();
         }
         ImageIcon imageIcon = new ImageIcon(cardImage);
@@ -571,10 +572,6 @@ public class Game {
         return gameMessagesPanel;
     }
 
-    public static JLabel getMainMessageLabel() {
-        return mainMessageLabel;
-    }
-
     public Map<LessonType, Integer> getYourLessons() {
         return yourLessons;
     }
@@ -630,4 +627,19 @@ public class Game {
 
     }
 
+    public ArrayList<Card> getAllCards() {
+        ArrayList<Card> cards = new ArrayList<>();
+        for(Component card: handPanel.getComponents()) {
+            cards.add((Card) card);
+        }
+        for(Component card: yourCreaturesPanel.getComponents()) {
+            cards.add((Card) card);
+        }
+        for(Component card: opponentCreaturesPanel.getComponents()) {
+            cards.add((Card) card);
+        }
+        cards.add(yourStartingCharacter);
+        cards.add(opponentStartingCharacter);
+        return cards;
+    }
 }

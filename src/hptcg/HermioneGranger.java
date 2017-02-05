@@ -3,7 +3,7 @@ package hptcg;
 public class HermioneGranger extends Character {
 
     protected HermioneGranger(Game game) {
-        super(game, "HermioneGranger");
+        super(game);
     }
 
     @Override

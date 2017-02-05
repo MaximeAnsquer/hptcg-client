@@ -2,8 +2,10 @@ package hptcg;
 
 public abstract class Spell extends Card {
 
-    protected Spell(Game game, String cardName) {
-        super(game, cardName);
+    protected Spell(Game game, int powerNeeded, LessonType powerTypeNeeded) {
+        super(game);
+        this.powerNeeded = powerNeeded;
+        this.powerTypeNeeded = powerTypeNeeded;
     }
 
     public void playCard() {
