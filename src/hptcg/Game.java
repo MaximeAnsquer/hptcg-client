@@ -22,8 +22,8 @@ public class Game {
     public JPanel opponentsCards;
     private Map<String, ImageIcon> cardsImageIcons;
     private static int savedOpponentsLastMoveId;
-    private int yourId;
-    private static int opponentId;
+    public int yourId;
+    int opponentId;
     public static int availableWidth;
     public static int availableHeight;
     public boolean yourTurn;
@@ -361,7 +361,7 @@ public class Game {
         leftPanel.add(genericPlayerInfo(opponentDeckSize, opponentHandSize, opponentStartingCharacter, opponentDiscardPileFrame), BorderLayout.NORTH);
     }
 
-    private static void waitFor(int i) {
+    void waitFor(int i) {
         try {
             Thread.sleep(i);
         } catch (InterruptedException e) {
@@ -552,7 +552,7 @@ public class Game {
         return savedOpponentsLastMoveId;
     }
 
-    public static int getOpponentId() {
+    public int getOpponentId() {
         return opponentId;
     }
 
@@ -616,12 +616,12 @@ public class Game {
         game.waitForOpponent();
 
         while(true) {
-            waitFor(100);  // delay so that the yourTurn variable knows it changed
+            game.waitFor(100);  // delay so that the yourTurn variable knows it changed
             while(!game.itsYourTurn()) {
                 if(game.newMoveFromOpponent()) {
                     game.applyOpponentsMove();
                 }
-                waitFor(1000);
+                game.waitFor(1000);
             }
         }
 
