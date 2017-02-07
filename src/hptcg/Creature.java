@@ -27,6 +27,7 @@ public class Creature extends Card {
         }
         this.setBorder(BorderFactory.createEmptyBorder(0, 7, 0, 7));
         game.yourCreaturesPanel.add(this);
+        game.refresh();
     }
 
     @Override

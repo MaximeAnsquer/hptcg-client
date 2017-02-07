@@ -14,6 +14,7 @@ public abstract class Spell extends Card {
         super.playCard();
         game.lastSpellPlayedLabel.setIcon(game.createImage(cardName, 1.3));
         game.lastSpellPlayedLabel.setToolTipText("<html><img src=\"file:"+new File("src/hptcg/images/" + cardName + ".jpg").toString()+"\">");
+        setDisabled(true);
         game.yourDiscardPileFrame.getContentPane().add(this);
     }
 
@@ -21,6 +22,7 @@ public abstract class Spell extends Card {
         super.applyOpponentPlayed();
         game.lastSpellPlayedLabel.setIcon(game.createImage(cardName, 1.3));
         game.lastSpellPlayedLabel.setToolTipText("<html><img src=\"file:"+new File("src/hptcg/images/" + cardName + ".jpg").toString()+"\">");
+        setDisabled(true);
         game.opponentDiscardPileFrame.getContentPane().add(this);
     }
 

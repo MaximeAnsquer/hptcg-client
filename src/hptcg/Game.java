@@ -3,8 +3,6 @@ package hptcg;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -50,13 +48,15 @@ public class Game {
     JFrame opponentDiscardPileFrame;
     JPanel yourCreaturesPanel;
     JPanel opponentCreaturesPanel;
+    Card endTurnCard;
 
     public Game() {
+        cardsImageIcons = new Hashtable<>();
+        endTurnCard  = new EndTurn(this);
         yourDeckSize = 60;
         yourHandSize = 7;
         opponentDeckSize = 60;
         opponentHandSize = 7;
-        cardsImageIcons = new Hashtable<>();
         yourStartingCharacter = chooseStartingCharacter();
         opponentStartingCharacter = opponentStartingCharacter();
         opponentsLessonsLabels = new Hashtable<>();
@@ -168,21 +168,28 @@ public class Game {
         JPanel playerInfoPanel = new JPanel();
         playerInfoPanel.setLayout(new BoxLayout(playerInfoPanel, BoxLayout.Y_AXIS));
         playerInfoPanel.add(discardPileButton(playerDiscardPileFrame));
+        playerInfoPanel.add(endYourTurnButton()); //TODO: remove
         playerInfoPanel.add(genericPlayerDeckLabel(playerDeckSize));
         playerInfoPanel.add(genericPlayerHandLabel(playerHandSize));
         playerInfoPanel.add(playerStartingCharacter);
         return playerInfoPanel;
     }
 
+    private JButton endYourTurnButton() {
+        JButton button = new JButton("End your turn");
+        button.addActionListener(e -> {
+            endYourTurn();
+            endTurnCard.playCard();
+        });
+        return button;
+    }
+
     private JButton discardPileButton(JFrame playerDiscardPileFrame) {
         JButton button = new JButton("Discard pile");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                playerDiscardPileFrame.repaint();
-                playerDiscardPileFrame.pack();
-                playerDiscardPileFrame.setVisible(true);
-            }
+        button.addActionListener(e -> {
+            playerDiscardPileFrame.repaint();
+            playerDiscardPileFrame.pack();
+            playerDiscardPileFrame.setVisible(true);
         });
         return button;
     }
@@ -282,10 +289,9 @@ public class Game {
             handPanel.add(new Charms(this));
             handPanel.add(new Avifors(this));
             handPanel.add(new Incarcifors(this));
-            handPanel.add(new Potions(this));
+            handPanel.add(new TakeRoot(this));
             handPanel.add(new CuriousRaven(this));
             handPanel.add(new Transfiguration(this));
-            handPanel.add(new Epoximise(this));
             handPanel.add(new CareOfMagicalCreatures(this));
             handPanel.add(new Quidditch(this));
         }
@@ -349,7 +355,7 @@ public class Game {
                 if(yourTurn) {
                     mainMessageLabel.setText("It's your turn");
                 } else {
-                    mainMessageLabel.setText("It's your opponent's turn.");
+                    mainMessageLabel.setText("It's your opponent's turn");
                 }
             }
         }
@@ -376,7 +382,7 @@ public class Game {
         Card opponentsCard = createCard(cardName);
         opponentsCard.applyOpponentPlayed();
         refresh();
-        beginYourTurn();
+//        beginYourTurn();
     }
 
     private Card createCard(String cardName) {
@@ -395,7 +401,7 @@ public class Game {
         return card;
     }
 
-    private void beginYourTurn() {
+    void beginYourTurn() {
         System.out.println("Beginning your turn");
         yourTurn = true;
         mainMessageLabel.setText("It's your turn");
@@ -463,7 +469,7 @@ public class Game {
 
     public void endYourTurn() {
         yourTurn = false;
-        mainMessageLabel.setText("It's your opponent's turn.");
+        mainMessageLabel.setText("It's your opponent's turn");
         refresh();
     }
 

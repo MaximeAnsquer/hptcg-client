@@ -12,8 +12,8 @@ import static hptcg.LessonType.TRANSFIGURATION;
 public class Incarcifors extends Spell {
 
     public Incarcifors(Game game) {
-        super(game, 1, TRANSFIGURATION);
-    } //TODO: 6
+        super(game, 2, TRANSFIGURATION);
+    }
 
     @Override
     public void playCard() {
@@ -29,13 +29,23 @@ public class Incarcifors extends Spell {
             finalCard.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    game.put("game/player" + game.yourId + "/target", finalCard.getClass().getSimpleName());
+                    for (Component card: game.opponentCreaturesPanel.getComponents()) {
+                        MouseListener[] mouseListeners = card.getMouseListeners();
+                        for (MouseListener mouseListener : mouseListeners) {
+                            card.removeMouseListener(mouseListener);
+                        }
+                    }
+                    String target = finalCard.getCardName();
+                    game.put("game/player" + game.yourId + "/target", target);
+                    finalCard.setDisabled(true);
                     game.opponentDiscardPile.add(finalCard);
                     game.opponentCreaturesPanel.remove(finalCard);
                     for (Card card: game.getAllCards()) {
                         card.setDisabled(false);
                     }
+                    game.addMessage("You targeted: " + target);
                     game.mainMessageLabel.setText("It's your turn");
+                    game.refresh();
                 }
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -60,20 +70,16 @@ public class Incarcifors extends Spell {
     @Override
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
-        boolean waiting = true;
-        String target = "";
-        while (waiting) {
-            target = game.get("game/player" + game.opponentId + "/target");
-            if(target != null && !target.equals("")) {
-                waiting = false;
-            }
-            game.waitFor(1000);
-        }
-        String finalTarget = target;
-        // Pas terrible, vire la première créature qui a le nom ciblé, mais pas forcément celle qui a été ciblée (s'il il y en plusieurs avec le même nom).
-        Optional<Component> creatureToRemove = Arrays.stream(game.yourCreaturesPanel.getComponents()).filter(card -> card.getClass().getSimpleName().equals(finalTarget)).findFirst();
-        game.yourDiscardPile.add(creatureToRemove.get());
-        game.yourCreaturesPanel.remove(creatureToRemove.get());
+        String target = cardChosenByOpponent();
+        //TODO: Pas terrible, vire la première créature qui a le nom ciblé, mais pas forcément celle qui a été ciblée (s'il il y en plusieurs avec le même nom).
+        Optional<Component> creatureToRemove = Arrays.stream(game.yourCreaturesPanel.getComponents())
+                .filter(card -> card.getClass().getSimpleName().equals(target))
+                .findFirst();
+        Card cardCreatureToRemove = (Card) creatureToRemove.get();
+        game.addMessage("Your opponent targeted: " + cardCreatureToRemove.getCardName());
+        cardCreatureToRemove.setDisabled(true);
+        game.yourDiscardPile.add(cardCreatureToRemove);
+        game.yourCreaturesPanel.remove(cardCreatureToRemove);
     }
 
     @Override

@@ -101,26 +101,14 @@ public abstract class Card extends JLabel implements ICard {
                     playCard();
                 }
             }
-
             @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
+            public void mousePressed(MouseEvent e) {}
             @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
+            public void mouseReleased(MouseEvent e) {}
             @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
+            public void mouseEntered(MouseEvent e) {}
             @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
+            public void mouseExited(MouseEvent e) {}
         });
     }
 
@@ -135,7 +123,7 @@ public abstract class Card extends JLabel implements ICard {
         game.addMessage("You played: " + cardName);
         System.out.println("You played: " + cardName);
         game.refresh();
-        game.endYourTurn(); //TODO: Remove
+        game.waitFor(500);
     }
 
     public void applyOpponentPlayed() {
@@ -144,6 +132,20 @@ public abstract class Card extends JLabel implements ICard {
 
     public void setImageScale(double scale) {
         setIcon(game.createImage(cardName, scale));
+    }
+
+    public String cardChosenByOpponent() {
+        boolean waiting = true;
+        String target = null;
+        game.refresh();
+        game.waitFor(1000);
+        while (waiting) {
+            target = game.get("game/player" + game.opponentId + "/target");
+            if (target != null && !target.equals("")) {
+                waiting = false;
+            }
+        }
+        return target;
     }
 
 }
