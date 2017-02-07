@@ -610,10 +610,6 @@ public class Game {
         return leftPanel;
     }
 
-    public String getServerUrl() {
-        return serverUrl;
-    }
-
     public static void main(String[] args) {
 
         Game game = new Game();

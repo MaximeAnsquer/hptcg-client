@@ -17,33 +17,37 @@ public class TakeRoot extends Spell {
     public void playCard() {
         super.playCard();
         game.put("game/player" + game.opponentId + "/target", "");
+        String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Your opponent is choosing a creature to discard.");
         game.refresh();
-//        String target = cardChosenByOpponent();
-        boolean waiting = true;
-        String target = null;
-        game.mainMessageLabel.setText("Your opponent is choosing a creature to discard.");
-        game.refresh();
-        while (waiting) {
-            target = game.get("game/player" + game.opponentId + "/target");
-            if (target != null && !target.equals("")) {
-                waiting = false;
+        (new Thread(() -> {
+            String target = null;
+            boolean waiting = true;
+            while (waiting) {
+                target = game.get("game/player" + game.opponentId + "/target");
+                if (target != null && !target.equals("")) {
+                    game.refresh();
+                    waiting = false;
+                }
+                game.waitFor(2000);
             }
-            game.waitFor(1000);
-        }
-        String finalTarget = target;
-        Optional<Component> creatureToRemove = Arrays.stream(game.opponentCreaturesPanel.getComponents())
-                .filter(card -> card.getClass().getSimpleName().equals(finalTarget))
-                .findFirst();
-        Card cardCreatureToRemove = (Card) creatureToRemove.get();
-        game.addMessage("Your opponent targeted: " + cardCreatureToRemove.getCardName());
-        cardCreatureToRemove.setDisabled(true);
-        game.opponentDiscardPile.add(cardCreatureToRemove);
-        game.opponentCreaturesPanel.remove(cardCreatureToRemove);
+            String finalTarget = target;
+            Optional<Component> creatureToRemove = Arrays.stream(game.opponentCreaturesPanel.getComponents())
+                    .filter(card -> card.getClass().getSimpleName().equals(finalTarget))
+                    .findFirst();
+            Card cardCreatureToRemove = (Card) creatureToRemove.get();
+            game.addMessage("Your opponent targeted: " + cardCreatureToRemove.getCardName());
+            cardCreatureToRemove.setDisabled(true);
+            game.opponentDiscardPile.add(cardCreatureToRemove);
+            game.opponentCreaturesPanel.remove(cardCreatureToRemove);
+            game.mainMessageLabel.setText(previousMainMessage);
+            game.refresh();
+        })).start();
     }
 
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
+        String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Choose one of your creatures to discard.");
         game.refresh();
         game.put("game/player" + game.yourId + "/target", "");
@@ -70,6 +74,8 @@ public class TakeRoot extends Spell {
                         card.setDisabled(false);
                     }
                     game.addMessage("You discarded: " + target);
+                    game.mainMessageLabel.setText(previousMainMessage);
+                    game.refresh();
                 }
                 @Override
                 public void mousePressed(MouseEvent e) {}
