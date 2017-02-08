@@ -38,8 +38,8 @@ public class Game {
     private int opponentDeckSize;
     private int opponentHandSize;
     private JPanel leftPanel;
-    //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
-    private String serverUrl = "http://localhost:8080/";
+    private String serverUrl = "http://hptcg-server.herokuapp.com/";
+    //    private String serverUrl = "http://localhost:8080/";
     Map<LessonType, Integer> totalPower;
     JLabel lastSpellPlayedLabel;
     JPanel yourDiscardPile;
@@ -316,7 +316,7 @@ public class Game {
     public ImageIcon createImage(String cardName, double scale) {
         BufferedImage cardImage = null;
         try {
-            cardImage = ImageIO.read(new File("src/hptcg/images/" + cardName + ".jpg"));
+            cardImage = ImageIO.read(getClass().getResource("images/" + cardName + ".jpg"));
         } catch (IOException e) {
             e.printStackTrace();
         }

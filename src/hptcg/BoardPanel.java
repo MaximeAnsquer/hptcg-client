@@ -16,7 +16,7 @@ public class BoardPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         try {
-            g.drawImage(new ImageIcon(ImageIO.read(new File("src/hptcg/images/castle.jpg"))).getImage(), 0, 0, null);
+            g.drawImage(new ImageIcon(ImageIO.read(getClass().getResource("images/castle.jpg"))).getImage(), 0, 0, null);
         } catch (IOException e) {
             e.printStackTrace();
         }
