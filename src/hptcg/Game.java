@@ -32,14 +32,10 @@ public class Game {
     private Map<LessonType, JLabel> yourLessonsLabels;
     private Map<LessonType, JLabel> opponentsLessonsLabels;
     private Card yourStartingCharacter;
-    private int yourDeckSize;
-    private int yourHandSize;
     private Card opponentStartingCharacter;
-    private int opponentDeckSize;
-    private int opponentHandSize;
     private JPanel leftPanel;
-    private String serverUrl = "http://hptcg-server.herokuapp.com/";
-    //    private String serverUrl = "http://localhost:8080/";
+    //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
+    private String serverUrl = "http://localhost:8080/";
     Map<LessonType, Integer> totalPower;
     JLabel lastSpellPlayedLabel;
     JPanel yourDiscardPile;
@@ -49,14 +45,17 @@ public class Game {
     JPanel yourCreaturesPanel;
     JPanel opponentCreaturesPanel;
     Card endTurnCard;
+    JButton yourDiscardPileButton;
+    JButton opponentDiscardPileButton;
+    JLabel yourHandLabel;
+    JLabel opponentHandLabel;
+    JLabel yourDeckLabel;
+    JLabel opponentDeckLabel;
+    int opponentHandSize = 7;
 
     public Game() {
         cardsImageIcons = new Hashtable<>();
         endTurnCard  = new EndTurn(this);
-        yourDeckSize = 60;
-        yourHandSize = 7;
-        opponentDeckSize = 60;
-        opponentHandSize = 7;
         yourStartingCharacter = chooseStartingCharacter();
         opponentStartingCharacter = opponentStartingCharacter();
         opponentsLessonsLabels = new Hashtable<>();
@@ -155,24 +154,76 @@ public class Game {
     private JPanel leftPanel() {
         leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(lastSpellPlayedLabel());
-        leftPanel.add(genericPlayerInfo(yourDeckSize, yourHandSize, yourStartingCharacter, yourDiscardPileFrame), BorderLayout.SOUTH);
+        leftPanel.add(yourInfoPanel(), BorderLayout.SOUTH);
         return leftPanel;
+    }
+
+    @SuppressWarnings("Duplicates")
+    private JPanel yourInfoPanel() {
+        JPanel yourInfoPanel = new JPanel();
+        yourInfoPanel.setLayout(new BoxLayout(yourInfoPanel, BoxLayout.Y_AXIS));
+        yourInfoPanel.add(yourDiscardPileButton());
+        yourInfoPanel.add(endYourTurnButton()); //TODO: remove
+        yourInfoPanel.add(yourDeckLabel());
+        yourInfoPanel.add(yourHandLabel());
+        yourInfoPanel.add(yourStartingCharacter);
+        return yourInfoPanel;
+    }
+
+    @SuppressWarnings("Duplicates")
+    private JPanel opponentInfoPanel() {
+        JPanel opponentInfoPanel = new JPanel();
+        opponentInfoPanel.setLayout(new BoxLayout(opponentInfoPanel, BoxLayout.Y_AXIS));
+        opponentInfoPanel.add(opponentDiscardPileButton());
+        opponentInfoPanel.add(opponentDeckLabel());
+        opponentInfoPanel.add(opponentHandLabel());
+        opponentInfoPanel.add(opponentStartingCharacter);
+        return opponentInfoPanel;
+    }
+
+    private JLabel yourDeckLabel() {
+        yourDeckLabel =  new JLabel("Deck: " + 53);
+        return yourDeckLabel;
+    }
+
+    private JLabel opponentDeckLabel() {
+        opponentDeckLabel =  new JLabel("Deck: " + 53);
+        return opponentDeckLabel;
+    }
+
+    private JLabel yourHandLabel() {
+        yourHandLabel =  new JLabel("Hand: " + 7);
+        return yourHandLabel;
+    }
+
+    private JLabel opponentHandLabel() {
+        opponentHandLabel =  new JLabel("Hand: " + 7);
+        return opponentHandLabel;
+    }
+
+    private JButton yourDiscardPileButton() {
+        yourDiscardPileButton = new JButton("Discard pile");
+        yourDiscardPileButton.addActionListener(e -> {
+            yourDiscardPileFrame.repaint();
+            yourDiscardPileFrame.pack();
+            yourDiscardPileFrame.setVisible(true);
+        });
+        return yourDiscardPileButton;
+    }
+
+    private JButton opponentDiscardPileButton() {
+        opponentDiscardPileButton = new JButton("Discard pile");
+        opponentDiscardPileButton.addActionListener(e -> {
+            opponentDiscardPileFrame.repaint();
+            opponentDiscardPileFrame.pack();
+            opponentDiscardPileFrame.setVisible(true);
+        });
+        return opponentDiscardPileButton;
     }
 
     private JLabel lastSpellPlayedLabel() {
         lastSpellPlayedLabel = new JLabel();
         return lastSpellPlayedLabel;
-    }
-
-    private JPanel genericPlayerInfo(int playerDeckSize, int playerHandSize, Card playerStartingCharacter, JFrame playerDiscardPileFrame) {
-        JPanel playerInfoPanel = new JPanel();
-        playerInfoPanel.setLayout(new BoxLayout(playerInfoPanel, BoxLayout.Y_AXIS));
-        playerInfoPanel.add(discardPileButton(playerDiscardPileFrame));
-        playerInfoPanel.add(endYourTurnButton()); //TODO: remove
-        playerInfoPanel.add(genericPlayerDeckLabel(playerDeckSize));
-        playerInfoPanel.add(genericPlayerHandLabel(playerHandSize));
-        playerInfoPanel.add(playerStartingCharacter);
-        return playerInfoPanel;
     }
 
     private JButton endYourTurnButton() {
@@ -182,24 +233,6 @@ public class Game {
             endTurnCard.playCard();
         });
         return button;
-    }
-
-    private JButton discardPileButton(JFrame playerDiscardPileFrame) {
-        JButton button = new JButton("Discard pile");
-        button.addActionListener(e -> {
-            playerDiscardPileFrame.repaint();
-            playerDiscardPileFrame.pack();
-            playerDiscardPileFrame.setVisible(true);
-        });
-        return button;
-    }
-
-    private JLabel genericPlayerHandLabel(int playerHandSize) {
-        return new JLabel("Hand: " + playerHandSize);
-    }
-
-    private JLabel genericPlayerDeckLabel(int playerDeckSize) {
-        return new JLabel("Deck: " + playerDeckSize);
     }
 
     private JPanel handAndMainMessagePanels() {
@@ -217,7 +250,7 @@ public class Game {
     }
 
     private JLabel mainMessageLabel() {
-        mainMessageLabel = new JLabel("This is the main message");
+        mainMessageLabel = new JLabel("Connecting to the server...");
         return mainMessageLabel;
     }
 
@@ -288,7 +321,7 @@ public class Game {
         for (int i=0; i < 3; i++) {
             handPanel.add(new Charms(this));
             handPanel.add(new Avifors(this));
-            handPanel.add(new Incarcifors(this));
+            handPanel.add(new Accio(this));
             handPanel.add(new TakeRoot(this));
             handPanel.add(new CuriousRaven(this));
             handPanel.add(new Transfiguration(this));
@@ -364,7 +397,7 @@ public class Game {
     private void createOpponent(String opponentCharacterName) {
         opponentStartingCharacter = createCard(opponentCharacterName);
         opponentStartingCharacter.setImageScale(1.25);
-        leftPanel.add(genericPlayerInfo(opponentDeckSize, opponentHandSize, opponentStartingCharacter, opponentDiscardPileFrame), BorderLayout.NORTH);
+        leftPanel.add(opponentInfoPanel(), BorderLayout.NORTH);
     }
 
     void waitFor(int i) {
@@ -494,6 +527,10 @@ public class Game {
     }
 
     public void refresh() {
+        yourHandLabel.setText("Hand: " + handPanel.getComponents().length);
+        opponentHandLabel.setText("Hand: " + opponentHandSize);
+        yourDiscardPileButton.setText("Discard pile " + "(" + yourDiscardPile.getComponents().length + ")");
+        opponentDiscardPileButton.setText("Discard pile " + "(" + opponentDiscardPile.getComponents().length + ")");
         frame.repaint();
         frame.pack();
     }
@@ -512,7 +549,9 @@ public class Game {
             if (getOpponentsLessons().get(lessonType) == 0 ) {
                 getOpponentsLessonsLabels().get(lessonType).setVisible(false);
             }
-            opponentDiscardPile.add(createCard(lessonType.toString()));
+            Card lessonDiscarded = createCard(lessonType.toString());
+            lessonDiscarded.setDisabled(true);
+            opponentDiscardPile.add(lessonDiscarded);
         } else {
             totalPower.put(lessonType, totalPower.get(lessonType) -1);
             getYourLessons().put(lessonType, getYourLessons().get(lessonType) -1);
@@ -520,8 +559,11 @@ public class Game {
             if (getYourLessons().get(lessonType) == 0 ) {
                 getYourLessonsLabels().get(lessonType).setVisible(false);
             }
-            yourDiscardPile.add(createCard(lessonType.toString()));
+            Card lessonDiscarded = createCard(lessonType.toString());
+            lessonDiscarded.setDisabled(true);
+            yourDiscardPile.add(lessonDiscarded);
         }
+        refresh();
     }
 
     public void addOpponentLesson(LessonType lessonType) {
@@ -586,25 +628,10 @@ public class Game {
         return yourStartingCharacter;
     }
 
-    public int getYourDeckSize() {
-        return yourDeckSize;
-    }
-
-    public int getYourHandSize() {
-        return yourHandSize;
-    }
-
     public Card getOpponentStartingCharacter() {
         return opponentStartingCharacter;
     }
 
-    public int getOpponentDeckSize() {
-        return opponentDeckSize;
-    }
-
-    public int getOpponentHandSize() {
-        return opponentHandSize;
-    }
 
     public JPanel getLeftPanel() {
         return leftPanel;
@@ -626,7 +653,6 @@ public class Game {
                 game.waitFor(1000);
             }
         }
-
     }
 
     public ArrayList<Card> getAllCards() {
@@ -638,6 +664,12 @@ public class Game {
             cards.add((Card) card);
         }
         for(Component card: opponentCreaturesPanel.getComponents()) {
+            cards.add((Card) card);
+        }
+        for(Component card: yourDiscardPile.getComponents()) {
+            cards.add((Card) card);
+        }
+        for(Component card: opponentDiscardPile.getComponents()) {
             cards.add((Card) card);
         }
         cards.add(yourStartingCharacter);

@@ -73,16 +73,19 @@ public abstract class Card extends JLabel implements ICard {
 
     public void playCard() {
         game.get("game/player" + game.getYourId() + "/play/" + cardName);
-        removeMouseListener(this.getMouseListeners()[0]);
+        setDisabled(true);
         game.removeFromHand(this);
         game.addMessage("You played: " + cardName);
         System.out.println("You played: " + cardName);
         game.refresh();
-        game.waitFor(1200);
+        game.waitFor(1100);
     }
 
     public void applyOpponentPlayed() {
-        removeMouseListener(this.getMouseListeners()[0]);
+        setDisabled(true);
+        if(!cardName.equals("EndTurn")) {
+            game.opponentHandSize--;
+        }
     }
 
     public void setImageScale(double scale) {
