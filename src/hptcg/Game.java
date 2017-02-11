@@ -19,7 +19,7 @@ public class Game {
     public JPanel yourPlayedCard;
     public JPanel opponentsCards;
     private Map<String, ImageIcon> cardsImageIcons;
-    private static int savedOpponentsLastMoveId;
+    private static int savedNbCardsPlayedByOpponent;
     public int yourId;
     int opponentId;
     public static int availableWidth;
@@ -34,8 +34,8 @@ public class Game {
     private Card yourStartingCharacter;
     private Card opponentStartingCharacter;
     private JPanel leftPanel;
-    //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
-    private String serverUrl = "http://localhost:8080/";
+    private String serverUrl = "http://hptcg-server.herokuapp.com/";
+//    private String serverUrl = "http://localhost:8080/";
     Map<LessonType, Integer> totalPower;
     JLabel lastSpellPlayedLabel;
     JPanel yourDiscardPile;
@@ -69,7 +69,7 @@ public class Game {
         opponentDiscardPileFrame = discardPileFrame(opponentDiscardPile);
         yourCreaturesPanel = creaturePanel();
         opponentCreaturesPanel = creaturePanel();
-        savedOpponentsLastMoveId = 0;
+        savedNbCardsPlayedByOpponent = 0;
         frame = new JFrame("Harry Potter TCG");
         setSize();
         Container contentPane = frame.getContentPane();
@@ -408,8 +408,8 @@ public class Game {
         }
     }
 
-    private void applyOpponentsMove() {
-        String cardName = get("game/player" + opponentId + "/lastCardPlayed");
+    private void applyOpponentsCard() {
+        String cardName = get("game/player" + opponentId + "/card" + (savedNbCardsPlayedByOpponent-1));
         System.out.println("Opponent played: " + cardName);
         addMessage("Your opponent played: " + cardName);
         Card opponentsCard = createCard(cardName);
@@ -458,19 +458,19 @@ public class Game {
         }
     }
 
-    private boolean newMoveFromOpponent() {
-        int fetchOpponentsLastMoveId = fetchOpponentsLastMoveId();
-        if (fetchOpponentsLastMoveId != savedOpponentsLastMoveId) {
-            System.out.println("New move from opponent!");
-            savedOpponentsLastMoveId++;
+    private boolean newCardFromOpponent() {
+        int fetchedNbCardsPlayedByOpponent = fetchedNbCardsPlayedByOpponent();
+        if (fetchedNbCardsPlayedByOpponent != savedNbCardsPlayedByOpponent) {
+            System.out.println("New card played by opponent");
+            savedNbCardsPlayedByOpponent++;
             return true;
         } else {
             return false;
         }
     }
 
-    private int fetchOpponentsLastMoveId() {
-        return Integer.parseInt(get("game/player" + opponentId + "/lastMoveId"));
+    private int fetchedNbCardsPlayedByOpponent() {
+        return Integer.parseInt(get("game/player" + opponentId + "/nbCardsPlayed"));
     }
 
     public String get(String uri) {
@@ -554,9 +554,9 @@ public class Game {
             opponentDiscardPile.add(lessonDiscarded);
         } else {
             totalPower.put(lessonType, totalPower.get(lessonType) -1);
-            getYourLessons().put(lessonType, getYourLessons().get(lessonType) -1);
-            getYourLessonsLabels().get(lessonType).setText(String.valueOf(getYourLessons().get(lessonType)));
-            if (getYourLessons().get(lessonType) == 0 ) {
+            yourLessons.put(lessonType, yourLessons.get(lessonType) -1);
+            getYourLessonsLabels().get(lessonType).setText(String.valueOf(yourLessons.get(lessonType)));
+            if (yourLessons.get(lessonType) == 0 ) {
                 getYourLessonsLabels().get(lessonType).setVisible(false);
             }
             Card lessonDiscarded = createCard(lessonType.toString());
@@ -570,89 +570,6 @@ public class Game {
         opponentsLessons.put(lessonType, opponentsLessons.get(lessonType) + 1);
         opponentsLessonsLabels.get(lessonType).setText(String.valueOf(opponentsLessons.get(lessonType)));
         opponentsLessonsLabels.get(lessonType).setVisible(true);
-    }
-
-    public JFrame getFrame() {
-        return frame;
-    }
-
-    public JPanel getHandPanel() {
-        return handPanel;
-    }
-
-    public JPanel getBoardPanel() {
-        return boardPanel;
-    }
-
-    public JPanel getYourPlayedCard() {
-        return yourPlayedCard;
-    }
-
-    public JPanel getOpponentsCards() {
-        return opponentsCards;
-    }
-
-    public Map<String, ImageIcon> getCardsImageIcons() {
-        return cardsImageIcons;
-    }
-
-    public static int getSavedOpponentsLastMoveId() {
-        return savedOpponentsLastMoveId;
-    }
-
-    public int getOpponentId() {
-        return opponentId;
-    }
-
-    public static int getAvailableWidth() {
-        return availableWidth;
-    }
-
-    public static int getAvailableHeight() {
-        return availableHeight;
-    }
-
-    public boolean isYourTurn() {
-        return yourTurn;
-    }
-
-    public static JTextArea getGameMessagesPanel() {
-        return gameMessagesPanel;
-    }
-
-    public Map<LessonType, Integer> getYourLessons() {
-        return yourLessons;
-    }
-
-    public Card getYourStartingCharacter() {
-        return yourStartingCharacter;
-    }
-
-    public Card getOpponentStartingCharacter() {
-        return opponentStartingCharacter;
-    }
-
-
-    public JPanel getLeftPanel() {
-        return leftPanel;
-    }
-
-    public static void main(String[] args) {
-
-        Game game = new Game();
-
-        game.connectToServer();
-        game.waitForOpponent();
-
-        while(true) {
-            game.waitFor(100);  // delay so that the yourTurn variable knows it changed
-            while(!game.itsYourTurn()) {
-                if(game.newMoveFromOpponent()) {
-                    game.applyOpponentsMove();
-                }
-                game.waitFor(1000);
-            }
-        }
     }
 
     public ArrayList<Card> getAllCards() {
@@ -675,5 +592,23 @@ public class Game {
         cards.add(yourStartingCharacter);
         cards.add(opponentStartingCharacter);
         return cards;
+    }
+
+    public static void main(String[] args) {
+
+        Game game = new Game();
+
+        game.connectToServer();
+        game.waitForOpponent();
+
+        while(true) {
+            game.waitFor(100);  // delay so that the yourTurn variable knows it changed
+            while(!game.itsYourTurn()) {
+                if(game.newCardFromOpponent()) {
+                    game.applyOpponentsCard();
+                }
+                game.waitFor(1200);
+            }
+        }
     }
 }

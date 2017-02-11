@@ -78,7 +78,6 @@ public abstract class Card extends JLabel implements ICard {
         game.addMessage("You played: " + cardName);
         System.out.println("You played: " + cardName);
         game.refresh();
-        game.waitFor(1100);
     }
 
     public void applyOpponentPlayed() {

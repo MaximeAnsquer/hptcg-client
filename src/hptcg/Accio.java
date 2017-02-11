@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
-import java.util.Optional;
 
 import static hptcg.LessonType.CHARMS;
 
@@ -71,7 +70,7 @@ public class Accio extends Spell {
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
         String previousMainMessage = game.mainMessageLabel.getText();
-        game.mainMessageLabel.setText("Your oppponent is choosing lessons from his discard pile.");
+        game.mainMessageLabel.setText("Your opponent is choosing lessons from his discard pile.");
         game.refresh();
         game.put("game/player" + game.opponentId + "/target", "");
         game.waitFor(2000);
@@ -97,6 +96,7 @@ public class Accio extends Spell {
                 game.opponentHandSize++;
             }
             game.mainMessageLabel.setText(previousMainMessage);
+            game.put("game/player" + game.yourId + "/target", "");
             game.refresh();
         })).start();
     }
@@ -105,11 +105,7 @@ public class Accio extends Spell {
     public boolean canBePlayed() {
         boolean atLeastTwoLessonsInDiscardPile = Arrays.stream(game.yourDiscardPile.getComponents()).filter(component -> {
             Card card = (Card) component;
-            if(card != null) {
-                return card.type.equals(Type.LESSON);
-            } else {
-                return false;
-            }
+            return card != null && card.type.equals(Type.LESSON);
         }).count() >= 2;
         return super.canBePlayed() && atLeastTwoLessonsInDiscardPile;
     }
