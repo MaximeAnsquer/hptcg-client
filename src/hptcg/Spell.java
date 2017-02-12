@@ -6,6 +6,7 @@ public abstract class Spell extends Card {
 
     protected Spell(Game game, int powerNeeded, LessonType powerTypeNeeded) {
         super(game);
+        this.type = Type.SPELL;
         this.powerNeeded = powerNeeded;
         this.powerTypeNeeded = powerTypeNeeded;
     }

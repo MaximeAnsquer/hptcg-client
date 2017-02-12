@@ -70,7 +70,7 @@ public class Incarcifors extends Spell {
     @Override
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
-        String target = cardChosenByOpponent();
+        String target = game.getOpponentTarget();
         //TODO: Pas terrible, vire la première créature qui a le nom ciblé, mais pas forcément celle qui a été ciblée (s'il il y en plusieurs avec le même nom).
         Optional<Component> creatureToRemove = Arrays.stream(game.yourCreaturesPanel.getComponents())
                 .filter(card -> card.getClass().getSimpleName().equals(target))

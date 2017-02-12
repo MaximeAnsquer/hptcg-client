@@ -12,6 +12,7 @@ public class Creature extends Card {
 
     protected Creature(Game game, int powerNeeded, int damage, int health, int lessonsToDiscard) {
         super(game);
+        this.type = Type.CREATURE;
         this.damage = damage;
         this.health = health;
         this.lessonsToDiscard = lessonsToDiscard;

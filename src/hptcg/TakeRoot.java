@@ -21,17 +21,7 @@ public class TakeRoot extends Spell {
         game.mainMessageLabel.setText("Your opponent is choosing a creature to discard.");
         game.refresh();
         (new Thread(() -> {
-            String target = null;
-            boolean waiting = true;
-            while (waiting) {
-                target = game.get("game/player" + game.opponentId + "/target");
-                if (target != null && !target.equals("")) {
-                    game.refresh();
-                    waiting = false;
-                }
-                game.waitFor(2000);
-            }
-            String finalTarget = target;
+            String finalTarget = game.getOpponentTarget();
             Optional<Component> creatureToRemove = Arrays.stream(game.opponentCreaturesPanel.getComponents())
                     .filter(card -> card.getClass().getSimpleName().equals(finalTarget))
                     .findFirst();

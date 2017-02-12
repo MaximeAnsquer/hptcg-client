@@ -91,18 +91,4 @@ public abstract class Card extends JLabel implements ICard {
         setIcon(game.createImage(cardName, scale));
     }
 
-    public String cardChosenByOpponent() {
-        boolean waiting = true;
-        String target = null;
-        game.refresh();
-        game.waitFor(1000);
-        while (waiting) {
-            target = game.get("game/player" + game.opponentId + "/target");
-            if (target != null && !target.equals("")) {
-                waiting = false;
-            }
-        }
-        return target;
-    }
-
 }

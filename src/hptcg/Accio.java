@@ -25,40 +25,42 @@ public class Accio extends Spell {
             card.setDisabled(true);
         }
         for(Component card: game.yourDiscardPile.getComponents()) {
-            card.addMouseListener(new MouseListener() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    lessons += ((Card) card).getCardName() + ",";
-                    card.removeMouseListener(this);
-                    game.yourDiscardPile.remove(card);
-                    game.handPanel.add(card);
-                    ((Card) card).setDisabled(false);
-                    nbLessonSelected++;
-                    game.mainMessageLabel.setText("Choose two lessons from your discard pile (" + nbLessonSelected + "/2)");
-                    game.yourDiscardPileFrame.repaint();
-                    game.yourDiscardPileFrame.pack();
-                    game.refresh();
-                    if (nbLessonSelected == 2) {
-                        game.put("game/player" + game.yourId + "/target", lessons);
-                        game.mainMessageLabel.setText(previousMainMessage);
-                        game.yourDiscardPileFrame.setVisible(false);
-                        for(Component card: game.yourDiscardPile.getComponents()) {
-                            card.removeMouseListener(this);
-                        }
-                        for(Card card: game.getAllCards()) {
-                            card.setDisabled(false);
+            if (((Card) card).type.equals(Type.LESSON)) {
+                card.addMouseListener(new MouseListener() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        lessons += ((Card) card).getCardName() + ",";
+                        card.removeMouseListener(this);
+                        game.yourDiscardPile.remove(card);
+                        game.handPanel.add(card);
+                        ((Card) card).setDisabled(false);
+                        nbLessonSelected++;
+                        game.mainMessageLabel.setText("Choose two lessons from your discard pile (" + nbLessonSelected + "/2)");
+                        game.yourDiscardPileFrame.repaint();
+                        game.yourDiscardPileFrame.pack();
+                        game.refresh();
+                        if (nbLessonSelected == 2) {
+                            game.put("game/player" + game.yourId + "/target", lessons);
+                            game.mainMessageLabel.setText(previousMainMessage);
+                            game.yourDiscardPileFrame.setVisible(false);
+                            for(Component card: game.yourDiscardPile.getComponents()) {
+                                card.removeMouseListener(this);
+                            }
+                            for(Card card: game.getAllCards()) {
+                                card.setDisabled(false);
+                            }
                         }
                     }
-                }
-                @Override
-                public void mousePressed(MouseEvent e) {}
-                @Override
-                public void mouseReleased(MouseEvent e) {}
-                @Override
-                public void mouseEntered(MouseEvent e) {}
-                @Override
-                public void mouseExited(MouseEvent e) {}
-            });
+                    @Override
+                    public void mousePressed(MouseEvent e) {}
+                    @Override
+                    public void mouseReleased(MouseEvent e) {}
+                    @Override
+                    public void mouseEntered(MouseEvent e) {}
+                    @Override
+                    public void mouseExited(MouseEvent e) {}
+                });
+            }
         }
         game.mainMessageLabel.setText("Choose two lessons from your discard pile (0/2)");
         game.yourDiscardPileFrame.setVisible(true);
@@ -75,16 +77,7 @@ public class Accio extends Spell {
         game.put("game/player" + game.opponentId + "/target", "");
         game.waitFor(2000);
         (new Thread(() -> {
-            String target = null;
-            boolean waiting = true;
-            while (waiting) {
-                target = game.get("game/player" + game.opponentId + "/target");
-                if (target != null && !target.equals("")) {
-                    game.refresh();
-                    waiting = false;
-                }
-                game.waitFor(2000);
-            }
+            String target = game.getOpponentTarget();
             String firstLesson = target.split(",")[0];
             String secondLesson = target.split(",")[1];
             game.addMessage("Your opponent targeted: \n" + firstLesson + ", " + secondLesson);

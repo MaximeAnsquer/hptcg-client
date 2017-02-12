@@ -34,8 +34,8 @@ public class Game {
     private Card yourStartingCharacter;
     private Card opponentStartingCharacter;
     private JPanel leftPanel;
-    private String serverUrl = "http://hptcg-server.herokuapp.com/";
-//    private String serverUrl = "http://localhost:8080/";
+    //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
+    private String serverUrl = "http://localhost:8080/";
     Map<LessonType, Integer> totalPower;
     JLabel lastSpellPlayedLabel;
     JPanel yourDiscardPile;
@@ -104,7 +104,7 @@ public class Game {
 
     private JPanel createDiscardPile() {
         JPanel discardPile = new JPanel();
-        discardPile.setLayout(new BoxLayout(discardPile, BoxLayout.Y_AXIS));
+        discardPile.setLayout(new BoxLayout(discardPile, BoxLayout.X_AXIS));
         return discardPile;
     }
 
@@ -321,10 +321,15 @@ public class Game {
         for (int i=0; i < 3; i++) {
             handPanel.add(new Charms(this));
             handPanel.add(new Avifors(this));
+            handPanel.add(new CauldronToSieve(this));
+            handPanel.add(new HagridAndTheStranger(this));
             handPanel.add(new Accio(this));
-            handPanel.add(new TakeRoot(this));
             handPanel.add(new CuriousRaven(this));
+            handPanel.add(new Incarcifors(this));
+            handPanel.add(new TakeRoot(this));
+            handPanel.add(new BoaConstrictor(this));
             handPanel.add(new Transfiguration(this));
+            handPanel.add(new CareOfMagicalCreatures(this));
             handPanel.add(new CareOfMagicalCreatures(this));
             handPanel.add(new Quidditch(this));
         }
@@ -435,6 +440,9 @@ public class Game {
     }
 
     void beginYourTurn() {
+        savedNbCardsPlayedByOpponent = 0;
+        put("game/player1/resetPlayedCards", "");
+        put("game/player2/resetPlayedCards", "");
         System.out.println("Beginning your turn");
         yourTurn = true;
         mainMessageLabel.setText("It's your turn");
@@ -456,6 +464,8 @@ public class Game {
             opponentId = yourId == 1 ? 2 : 1;
             yourTurn = false;
         }
+        savedNbCardsPlayedByOpponent = 0;
+        put("game/player" + yourId + "/resetPlayedCards", "");
     }
 
     private boolean newCardFromOpponent() {
@@ -610,5 +620,25 @@ public class Game {
                 game.waitFor(1200);
             }
         }
+    }
+
+    public String getOpponentTarget() {
+        String target = null;
+        boolean waiting = true;
+        for (Card card: getAllCards()) {
+            card.setDisabled(true);
+        }
+        while (waiting) {
+            target = get("game/player" + opponentId + "/target");
+            if (target != null && !target.equals("")) {
+                refresh();
+                waiting = false;
+            }
+            waitFor(1000);
+        }
+        for (Card card: getAllCards()) {
+            card.setDisabled(false);
+        }
+        return target;
     }
 }
