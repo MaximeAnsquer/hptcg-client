@@ -8,6 +8,7 @@ import java.net.URL;
 
 public abstract class Card extends JLabel implements ICard {
 
+    protected boolean realCard;
     protected int powerNeeded;
     protected LessonType powerTypeNeeded;
     protected Edition edition;
@@ -46,8 +47,8 @@ public abstract class Card extends JLabel implements ICard {
         this.game = game;
         this.cardName = this.getClass().getSimpleName();
         this.imageIcon = this.game.getImage(cardName, 1.0);
+        this.realCard = true;
         setIcon(imageIcon);
-//        setToolTipText("<html><img src="+new File("src/hptcg/images/" + cardName + ".jpg").toString()+"\">");
         setToolTipText("<html><img src=\"" + getClass().getResource("images/" + cardName + ".jpg") + "\">");
         addMouseListener(new MouseListener() {
             @Override
@@ -76,13 +77,13 @@ public abstract class Card extends JLabel implements ICard {
         setDisabled(true);
         game.removeFromHand(this);
         game.addMessage("You played: " + cardName);
-        System.out.println("You played: " + cardName);
+//        System.out.println("You played: " + cardName);
         game.refresh();
     }
 
     public void applyOpponentPlayed() {
         setDisabled(true);
-        if(!cardName.equals("EndTurn")) {
+        if(realCard) {
             game.opponentHandSize--;
         }
     }

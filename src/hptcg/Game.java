@@ -7,12 +7,12 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 
+@SuppressWarnings("Duplicates")
 public class Game {
 
+    private final DrawHand drawHandCard;
     public JFrame frame;
     public JPanel handPanel;
     public JPanel boardPanel;
@@ -45,6 +45,7 @@ public class Game {
     JPanel yourCreaturesPanel;
     JPanel opponentCreaturesPanel;
     Card endTurnCard;
+    Card drawCard;
     JButton yourDiscardPileButton;
     JButton opponentDiscardPileButton;
     JLabel yourHandLabel;
@@ -52,10 +53,14 @@ public class Game {
     JLabel yourDeckLabel;
     JLabel opponentDeckLabel;
     int opponentHandSize = 7;
+    Map<Integer, Card> yourDeck;
+    Map<Integer, Card> opponentDeck;
 
     public Game() {
         cardsImageIcons = new Hashtable<>();
         endTurnCard  = new EndTurn(this);
+        drawCard  = new Draw(this);
+        drawHandCard  = new DrawHand(this);
         yourStartingCharacter = chooseStartingCharacter();
         opponentStartingCharacter = opponentStartingCharacter();
         opponentsLessonsLabels = new Hashtable<>();
@@ -69,6 +74,8 @@ public class Game {
         opponentDiscardPileFrame = discardPileFrame(opponentDiscardPile);
         yourCreaturesPanel = creaturePanel();
         opponentCreaturesPanel = creaturePanel();
+        opponentDeck = createOpponentDeck();
+        yourDeck = createYourDeck();
         savedNbCardsPlayedByOpponent = 0;
         frame = new JFrame("Harry Potter TCG");
         setSize();
@@ -81,6 +88,45 @@ public class Game {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    private Map<Integer, Card> createYourDeck() {
+        //TODO: importer le deck choisi par le joueur
+        yourDeck = createFakeDeck();
+        return yourDeck;
+    }
+
+    private Map<Integer, Card> createOpponentDeck() {
+        //TODO: importer le deck choisi par le joueur
+        opponentDeck = createFakeDeck();
+        return opponentDeck;
+    }
+
+    private Map<Integer, Card> createFakeDeck() {
+        Map<Integer, Card> fakeDeck = new Hashtable<>();
+        for (int i=0; i < 3; i++) {
+            fakeDeck.put(fakeDeck.size(), new Charms(this));
+            fakeDeck.put(fakeDeck.size(), new Charms(this));
+            fakeDeck.put(fakeDeck.size(), new Avifors(this));
+            fakeDeck.put(fakeDeck.size(), new CuriousRaven(this));
+            fakeDeck.put(fakeDeck.size(), new MagicalMishap(this));
+            fakeDeck.put(fakeDeck.size(), new CauldronToSieve(this));
+            fakeDeck.put(fakeDeck.size(), new HagridAndTheStranger(this));
+            fakeDeck.put(fakeDeck.size(), new Accio(this));
+            fakeDeck.put(fakeDeck.size(), new Potions(this));
+            fakeDeck.put(fakeDeck.size(), new Potions(this));
+            fakeDeck.put(fakeDeck.size(), new Epoximise(this));
+            fakeDeck.put(fakeDeck.size(), new Incarcifors(this));
+            fakeDeck.put(fakeDeck.size(), new TakeRoot(this));
+            fakeDeck.put(fakeDeck.size(), new ViciousWolf(this));
+            fakeDeck.put(fakeDeck.size(), new ForestTroll(this));
+            fakeDeck.put(fakeDeck.size(), new BoaConstrictor(this));
+            fakeDeck.put(fakeDeck.size(), new Transfiguration(this));
+            fakeDeck.put(fakeDeck.size(), new CareOfMagicalCreatures(this));
+            fakeDeck.put(fakeDeck.size(), new CareOfMagicalCreatures(this));
+            fakeDeck.put(fakeDeck.size(), new MagicalMishap(this));
+        }
+        return fakeDeck;
     }
 
     private JPanel creaturePanel() {
@@ -164,13 +210,25 @@ public class Game {
         yourInfoPanel.setLayout(new BoxLayout(yourInfoPanel, BoxLayout.Y_AXIS));
         yourInfoPanel.add(yourDiscardPileButton());
         yourInfoPanel.add(endYourTurnButton()); //TODO: remove
-        yourInfoPanel.add(yourDeckLabel());
+        yourInfoPanel.add(createDrawButton());
+        yourInfoPanel.add(createYourDeckLabel());
         yourInfoPanel.add(yourHandLabel());
         yourInfoPanel.add(yourStartingCharacter);
         return yourInfoPanel;
     }
 
-    @SuppressWarnings("Duplicates")
+    private JButton createDrawButton() {
+        //TODO: update hand size, notify opponent... -> handling actions
+        JButton drawButton = new JButton("Draw");
+        drawButton.addActionListener(e -> {
+            if (yourTurn) {
+                draw();
+                refresh();
+            }
+        });
+        return drawButton;
+    }
+
     private JPanel opponentInfoPanel() {
         JPanel opponentInfoPanel = new JPanel();
         opponentInfoPanel.setLayout(new BoxLayout(opponentInfoPanel, BoxLayout.Y_AXIS));
@@ -181,7 +239,7 @@ public class Game {
         return opponentInfoPanel;
     }
 
-    private JLabel yourDeckLabel() {
+    private JLabel createYourDeckLabel() {
         yourDeckLabel =  new JLabel("Deck: " + 53);
         return yourDeckLabel;
     }
@@ -228,11 +286,12 @@ public class Game {
 
     private JButton endYourTurnButton() {
         JButton button = new JButton("End your turn");
-        button.addActionListener(e -> {
-            endYourTurn();
-            endTurnCard.playCard();
-        });
+        button.addActionListener(e -> endYourTurn());
         return button;
+    }
+
+    private void endYourTurn() {
+        endTurnCard.playCard();
     }
 
     private JPanel handAndMainMessagePanels() {
@@ -318,22 +377,11 @@ public class Game {
     private JScrollPane handPanel() {
         handPanel = new JPanel();
         handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
-        for (int i=0; i < 3; i++) {
-            handPanel.add(new Charms(this));
-            handPanel.add(new Avifors(this));
-            handPanel.add(new CauldronToSieve(this));
-            handPanel.add(new HagridAndTheStranger(this));
-            handPanel.add(new Accio(this));
-            handPanel.add(new CuriousRaven(this));
-            handPanel.add(new Incarcifors(this));
-            handPanel.add(new TakeRoot(this));
-            handPanel.add(new BoaConstrictor(this));
-            handPanel.add(new Transfiguration(this));
-            handPanel.add(new CareOfMagicalCreatures(this));
-            handPanel.add(new CareOfMagicalCreatures(this));
-            handPanel.add(new Quidditch(this));
-        }
         return new JScrollPane(handPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    }
+
+    private void draw() {
+        drawCard.playCard();
     }
 
     public ImageIcon getImage(String cardName, double scale) {
@@ -415,9 +463,10 @@ public class Game {
 
     private void applyOpponentsCard() {
         String cardName = get("game/player" + opponentId + "/card" + (savedNbCardsPlayedByOpponent-1));
-        System.out.println("Opponent played: " + cardName);
+//        System.out.println("Opponent played: " + cardName);
         addMessage("Your opponent played: " + cardName);
         Card opponentsCard = createCard(cardName);
+//        System.out.println("opponentsCard: " + opponentsCard);
         opponentsCard.applyOpponentPlayed();
         refresh();
 //        beginYourTurn();
@@ -471,7 +520,7 @@ public class Game {
     private boolean newCardFromOpponent() {
         int fetchedNbCardsPlayedByOpponent = fetchedNbCardsPlayedByOpponent();
         if (fetchedNbCardsPlayedByOpponent != savedNbCardsPlayedByOpponent) {
-            System.out.println("New card played by opponent");
+//            System.out.println("New card played by opponent");
             savedNbCardsPlayedByOpponent++;
             return true;
         } else {
@@ -510,12 +559,6 @@ public class Game {
         }
     }
 
-    public void endYourTurn() {
-        yourTurn = false;
-        mainMessageLabel.setText("It's your opponent's turn");
-        refresh();
-    }
-
     public void addMessage(String s) {
         gameMessagesPanel.append("\n" + s);
     }
@@ -539,6 +582,8 @@ public class Game {
     public void refresh() {
         yourHandLabel.setText("Hand: " + handPanel.getComponents().length);
         opponentHandLabel.setText("Hand: " + opponentHandSize);
+        yourDeckLabel.setText("Deck: " + yourDeck.size());
+        opponentDeckLabel.setText("Deck: " + opponentDeck.size());
         yourDiscardPileButton.setText("Discard pile " + "(" + yourDiscardPile.getComponents().length + ")");
         opponentDiscardPileButton.setText("Discard pile " + "(" + opponentDiscardPile.getComponents().length + ")");
         frame.repaint();
@@ -611,15 +656,32 @@ public class Game {
         game.connectToServer();
         game.waitForOpponent();
 
+        game.mainMessageLabel.setText("Drawing hands, please wait...");
+        while(game.getYourHandSize() < 7 || game.opponentHandSize < 7) {
+            if (game.yourTurn) {
+                game.drawHand();
+                game.endYourTurn();
+            } else {
+                if(game.newCardFromOpponent()) {
+                    game.applyOpponentsCard();
+                }
+            }
+            game.waitFor(1200);
+        }
+
         while(true) {
             game.waitFor(100);  // delay so that the yourTurn variable knows it changed
-            while(!game.itsYourTurn()) {
+            while(!game.yourTurn) {
                 if(game.newCardFromOpponent()) {
                     game.applyOpponentsCard();
                 }
                 game.waitFor(1200);
             }
         }
+    }
+
+    private void drawHand() {
+        drawHandCard.playCard();
     }
 
     public String getOpponentTarget() {
@@ -640,5 +702,39 @@ public class Game {
             card.setDisabled(false);
         }
         return target;
+    }
+
+    public void damageOpponent(int n) {
+        if (n >= opponentDeck.size()) {
+            //TODO: You won
+        } else {
+            String cards = get("game/player" + opponentId + "/popDeckCopy/" + n);
+            for (String cardNbString: cards.split(",")) {
+                Card card = opponentDeck.get(Integer.parseInt(cardNbString));
+                card.setDisabled(true);
+                opponentDiscardPile.add(card);
+                opponentDeck.remove(card);
+            }
+        }
+        refresh();
+    }
+
+    public void takeDamage(int n) {
+        if (n >= yourDeck.size()) {
+            //TODO: You lost
+        } else {
+            String cards = get("game/player" + yourId + "/popDeck/" + n);
+            for (String cardNbString: cards.split(",")) {
+                Card card = yourDeck.get(Integer.parseInt(cardNbString));
+                card.setDisabled(true);
+                yourDiscardPile.add(card);
+                yourDeck.remove(card);
+            }
+        }
+        refresh();
+    }
+
+    public int getYourHandSize() {
+        return handPanel.getComponentCount();
     }
 }

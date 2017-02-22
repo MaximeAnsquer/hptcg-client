@@ -30,6 +30,7 @@ public class HagridAndTheStranger extends Spell {
                     public void mouseClicked(MouseEvent e) {
                         creatureChosen = ((Card) card).getCardName();
                         card.removeMouseListener(this);
+                        ((Card) card).setDisabled(false);
                         game.yourDiscardPile.remove(card);
                         ((Card) card).setDisabled(false);
                         game.handPanel.add(card);
