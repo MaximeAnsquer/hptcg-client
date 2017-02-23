@@ -17,12 +17,13 @@ public abstract class Card extends JLabel implements ICard {
     protected ImageIcon imageIcon;
     protected Game game;
     protected String cardName;
+    private boolean wasDisabled;
 
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
 
-    protected boolean disabled = false;
+    protected boolean disabled;
 
     @Override
     public void setText(String text) {
@@ -48,6 +49,7 @@ public abstract class Card extends JLabel implements ICard {
         this.cardName = this.getClass().getSimpleName();
         this.imageIcon = this.game.getImage(cardName, 1.0);
         this.realCard = true;
+        this.disabled = false;
         setIcon(imageIcon);
         setToolTipText("<html><img src=\"" + getClass().getResource("images/" + cardName + ".jpg") + "\">");
         addMouseListener(new MouseListener() {
@@ -92,4 +94,15 @@ public abstract class Card extends JLabel implements ICard {
         setIcon(game.createImage(cardName, scale));
     }
 
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setWasDisabled(boolean wasDisabled) {
+        this.wasDisabled = wasDisabled;
+    }
+
+    public boolean getWasDisabled() {
+        return wasDisabled;
+    }
 }

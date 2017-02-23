@@ -2,11 +2,14 @@ package hptcg;
 
 import javax.swing.*;
 
+import java.awt.*;
+
 import static hptcg.LessonType.CARE_OF_MAGICAL_CREATURES;
 
 public class Creature extends Card {
 
     protected int damage;
+    protected int damageTaken;
     protected int health;
     protected int lessonsToDiscard;
 
@@ -18,6 +21,30 @@ public class Creature extends Card {
         this.lessonsToDiscard = lessonsToDiscard;
         this.powerNeeded = powerNeeded;
         this.powerTypeNeeded = CARE_OF_MAGICAL_CREATURES;
+        this.damageTaken = 0;
+    }
+
+    public void dealDamage(int n) {
+        damageTaken += n;
+        if (damageTaken >= health) {
+            die();
+        }
+    }
+
+    private void die() {
+        boolean yourCreature = false;
+        for (Component c: game.yourCreaturesPanel.getComponents()) {
+            Card card = (Card) c;
+            if (card == this) {
+                yourCreature = true;
+            }
+        }
+        JPanel creaturePanel = yourCreature ? game.yourCreaturesPanel : game.opponentCreaturesPanel;
+        JPanel discardPile = yourCreature ? game.yourDiscardPile : game.opponentDiscardPile;
+        setDisabled(true);
+        discardPile.add(this);
+        creaturePanel.remove(this);
+        game.refresh();
     }
 
     @Override

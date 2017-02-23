@@ -17,7 +17,6 @@ public class Draw extends Card {
         super.playCard();
         String cards = game.get("game/player" + game.yourId + "/popDeck/" + 1);
         for (String cardNbString: cards.split(",")) {
-            System.out.println("You drew: " + cardNbString);
             Card card = game.yourDeck.get(Integer.parseInt(cardNbString));
             game.yourDeck.remove(card);
             game.handPanel.add(card);
@@ -30,7 +29,6 @@ public class Draw extends Card {
         super.applyOpponentPlayed();
         String cards = game.get("game/player" + game.opponentId + "/popDeckCopy/" + 1);
         for (String cardNbString: cards.split(",")) {
-            System.out.println("Opponent drew: " + cardNbString);
             Card card = game.opponentDeck.get(Integer.parseInt(cardNbString));
             game.opponentDeck.remove(card);
             game.opponentHandSize++;

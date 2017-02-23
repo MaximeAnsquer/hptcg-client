@@ -4,10 +4,15 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map;
 
 @SuppressWarnings("Duplicates")
 public class Game {
@@ -31,8 +36,8 @@ public class Game {
     Map<LessonType, Integer> opponentsLessons;
     private Map<LessonType, JLabel> yourLessonsLabels;
     private Map<LessonType, JLabel> opponentsLessonsLabels;
-    private Card yourStartingCharacter;
-    private Card opponentStartingCharacter;
+    Card yourStartingCharacter;
+    Card opponentStartingCharacter;
     private JPanel leftPanel;
     //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
     private String serverUrl = "http://localhost:8080/";
@@ -109,14 +114,14 @@ public class Game {
             fakeDeck.put(fakeDeck.size(), new Charms(this));
             fakeDeck.put(fakeDeck.size(), new Avifors(this));
             fakeDeck.put(fakeDeck.size(), new CuriousRaven(this));
-            fakeDeck.put(fakeDeck.size(), new MagicalMishap(this));
-            fakeDeck.put(fakeDeck.size(), new CauldronToSieve(this));
+            fakeDeck.put(fakeDeck.size(), new Stupefy(this));
+            fakeDeck.put(fakeDeck.size(), new Charms(this));
             fakeDeck.put(fakeDeck.size(), new HagridAndTheStranger(this));
             fakeDeck.put(fakeDeck.size(), new Accio(this));
             fakeDeck.put(fakeDeck.size(), new Potions(this));
             fakeDeck.put(fakeDeck.size(), new Potions(this));
             fakeDeck.put(fakeDeck.size(), new Epoximise(this));
-            fakeDeck.put(fakeDeck.size(), new Incarcifors(this));
+            fakeDeck.put(fakeDeck.size(), new Vermillious(this));
             fakeDeck.put(fakeDeck.size(), new TakeRoot(this));
             fakeDeck.put(fakeDeck.size(), new ViciousWolf(this));
             fakeDeck.put(fakeDeck.size(), new ForestTroll(this));
@@ -141,7 +146,9 @@ public class Game {
         JFrame frame = new JFrame(title);
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-        contentPane.add(discardPile);
+        JScrollPane scrollPane = new JScrollPane(discardPile);
+        scrollPane.setMaximumSize(new Dimension(500, 500));
+        contentPane.add(scrollPane);
         frame.setMinimumSize(new Dimension(390, 0));
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
@@ -646,6 +653,14 @@ public class Game {
         }
         cards.add(yourStartingCharacter);
         cards.add(opponentStartingCharacter);
+        return cards;
+    }
+
+    public ArrayList<Card> getOpponentCreatures() {
+        ArrayList<Card> cards = new ArrayList<>();
+        for(Component card: opponentCreaturesPanel.getComponents()) {
+            cards.add((Card) card);
+        }
         return cards;
     }
 
