@@ -60,6 +60,7 @@ public class Game {
     int opponentHandSize = 7;
     Map<Integer, Card> yourDeck;
     Map<Integer, Card> opponentDeck;
+    private JScrollPane messageScrollPane;
 
     public Game() {
         cardsImageIcons = new Hashtable<>();
@@ -79,7 +80,6 @@ public class Game {
         opponentDiscardPileFrame = discardPileFrame(opponentDiscardPile);
         yourCreaturesPanel = creaturePanel();
         opponentCreaturesPanel = creaturePanel();
-        opponentDeck = createOpponentDeck();
         yourDeck = createYourDeck();
         savedNbCardsPlayedByOpponent = 0;
         frame = new JFrame("Harry Potter TCG");
@@ -96,42 +96,19 @@ public class Game {
     }
 
     private Map<Integer, Card> createYourDeck() {
-        //TODO: importer le deck choisi par le joueur
-        yourDeck = createFakeDeck();
-        return yourDeck;
+        if (yourStartingCharacter.getCardName().equals("HermioneGranger")) {
+            return DeckCollection.createHermioneStarterBaseSet(this);
+        } else {
+            return DeckCollection.createDracoStarterBaseSet(this);
+        }
     }
 
     private Map<Integer, Card> createOpponentDeck() {
-        //TODO: importer le deck choisi par le joueur
-        opponentDeck = createFakeDeck();
-        return opponentDeck;
-    }
-
-    private Map<Integer, Card> createFakeDeck() {
-        Map<Integer, Card> fakeDeck = new Hashtable<>();
-        for (int i=0; i < 3; i++) {
-            fakeDeck.put(fakeDeck.size(), new Charms(this));
-            fakeDeck.put(fakeDeck.size(), new Charms(this));
-            fakeDeck.put(fakeDeck.size(), new Avifors(this));
-            fakeDeck.put(fakeDeck.size(), new CuriousRaven(this));
-            fakeDeck.put(fakeDeck.size(), new Stupefy(this));
-            fakeDeck.put(fakeDeck.size(), new Charms(this));
-            fakeDeck.put(fakeDeck.size(), new HagridAndTheStranger(this));
-            fakeDeck.put(fakeDeck.size(), new Accio(this));
-            fakeDeck.put(fakeDeck.size(), new Potions(this));
-            fakeDeck.put(fakeDeck.size(), new Potions(this));
-            fakeDeck.put(fakeDeck.size(), new Epoximise(this));
-            fakeDeck.put(fakeDeck.size(), new Vermillious(this));
-            fakeDeck.put(fakeDeck.size(), new TakeRoot(this));
-            fakeDeck.put(fakeDeck.size(), new ViciousWolf(this));
-            fakeDeck.put(fakeDeck.size(), new ForestTroll(this));
-            fakeDeck.put(fakeDeck.size(), new BoaConstrictor(this));
-            fakeDeck.put(fakeDeck.size(), new Transfiguration(this));
-            fakeDeck.put(fakeDeck.size(), new CareOfMagicalCreatures(this));
-            fakeDeck.put(fakeDeck.size(), new CareOfMagicalCreatures(this));
-            fakeDeck.put(fakeDeck.size(), new MagicalMishap(this));
+        if (opponentStartingCharacter.getCardName().equals("HermioneGranger")) {
+            return DeckCollection.createHermioneStarterBaseSet(this);
+        } else {
+            return DeckCollection.createDracoStarterBaseSet(this);
         }
-        return fakeDeck;
     }
 
     private JPanel creaturePanel() {
@@ -144,14 +121,13 @@ public class Game {
     private JFrame discardPileFrame(JPanel discardPile) {
         String title = discardPile == yourDiscardPile ? "Your discard pile" : "Opponen'ts discard pile";
         JFrame frame = new JFrame(title);
+        frame.setLocationRelativeTo(null);
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
         JScrollPane scrollPane = new JScrollPane(discardPile);
-        scrollPane.setMaximumSize(new Dimension(500, 500));
+        scrollPane.setPreferredSize(new Dimension(700, 200));
         contentPane.add(scrollPane);
-        frame.setMinimumSize(new Dimension(390, 0));
         frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
         return frame;
     }
 
@@ -177,7 +153,7 @@ public class Game {
 
     private Card chooseStartingCharacter() {
         int choice = JOptionPane.showOptionDialog(frame, "Please choose your starting character",
-                "Startig Character",
+                "Starting Character",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 null,
@@ -323,7 +299,8 @@ public class Game {
     private JScrollPane gameMessagesPanel() {
         gameMessagesPanel = new JTextArea();
         gameMessagesPanel.setLayout(new BoxLayout(gameMessagesPanel, BoxLayout.Y_AXIS));
-        return new JScrollPane(gameMessagesPanel);
+        messageScrollPane = new JScrollPane(gameMessagesPanel);
+        return messageScrollPane;
     }
 
     private void setSize() {
@@ -457,6 +434,7 @@ public class Game {
     private void createOpponent(String opponentCharacterName) {
         opponentStartingCharacter = createCard(opponentCharacterName);
         opponentStartingCharacter.setImageScale(1.25);
+        opponentDeck = createOpponentDeck();
         leftPanel.add(opponentInfoPanel(), BorderLayout.NORTH);
     }
 
@@ -568,6 +546,8 @@ public class Game {
 
     public void addMessage(String s) {
         gameMessagesPanel.append("\n" + s);
+        refresh();
+        messageScrollPane.getVerticalScrollBar().setValue(messageScrollPane.getVerticalScrollBar().getMaximum());
     }
 
     public int getYourId() {
@@ -593,6 +573,10 @@ public class Game {
         opponentDeckLabel.setText("Deck: " + opponentDeck.size());
         yourDiscardPileButton.setText("Discard pile " + "(" + yourDiscardPile.getComponents().length + ")");
         opponentDiscardPileButton.setText("Discard pile " + "(" + opponentDiscardPile.getComponents().length + ")");
+        yourDiscardPileFrame.repaint();
+        yourDiscardPileFrame.pack();
+        opponentDiscardPileFrame.repaint();
+        opponentDiscardPileFrame.pack();
         frame.repaint();
         frame.pack();
     }
