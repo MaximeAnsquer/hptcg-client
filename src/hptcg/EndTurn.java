@@ -26,7 +26,7 @@ public class EndTurn extends Card {
         super.applyCardEffect();
         game.yourTurn = false;
         game.mainMessageLabel.setText("It's your opponent's turn");
-        game.yourActionsLeft = 2;
+        game.takeCreatureDamage();
         game.refresh();
     }
 }

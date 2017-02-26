@@ -15,7 +15,8 @@ public abstract class Card extends JLabel implements ICard {
     protected ImageIcon imageIcon;
     protected Game game;
     protected String cardName;
-    private boolean wasDisabled;
+    protected boolean wasDisabled;
+    protected boolean removeActionAfterPlay = true;
 
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
@@ -74,7 +75,9 @@ public abstract class Card extends JLabel implements ICard {
 
     public void playCard() {
         applyCardEffect();
-        removeAction();
+        if (removeActionAfterPlay) {
+            removeAction();
+        }
     }
 
     protected abstract void removeAction();

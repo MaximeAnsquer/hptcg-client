@@ -12,6 +12,7 @@ public class Vermillious extends Spell {
 
     protected Vermillious(Game game) {
         super(game, 4, LessonType.CHARMS);
+        removeActionAfterPlay = false;
     }
 
     @Override
@@ -44,6 +45,7 @@ public class Vermillious extends Spell {
                         targetCreature.dealDamage(3);
                     }
                     game.mainMessageLabel.setText(previousMainMessage);
+                    removeAction();
                     game.refresh();
                 }
                 @Override

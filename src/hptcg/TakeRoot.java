@@ -11,7 +11,8 @@ import static hptcg.LessonType.TRANSFIGURATION;
 public class TakeRoot extends Spell {
 
     public TakeRoot(Game game) {
-        super(game, 2, TRANSFIGURATION); //TODO
+        super(game, 5, TRANSFIGURATION);
+        removeActionAfterPlay = false;
     }
 
     public void applyCardEffect() {
@@ -31,6 +32,7 @@ public class TakeRoot extends Spell {
             game.opponentDiscardPile.add(cardCreatureToRemove);
             game.opponentCreaturesPanel.remove(cardCreatureToRemove);
             game.mainMessageLabel.setText(previousMainMessage);
+            removeAction();
             game.refresh();
         })).start();
     }

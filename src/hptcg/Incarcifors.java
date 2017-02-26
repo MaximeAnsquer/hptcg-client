@@ -12,6 +12,7 @@ public class Incarcifors extends Spell {
 
     public Incarcifors(Game game) {
         super(game, 2, TRANSFIGURATION);
+        removeActionAfterPlay = false;
     }
 
     @Override
@@ -44,6 +45,7 @@ public class Incarcifors extends Spell {
                     }
                     game.addMessage("You targeted: " + target);
                     game.mainMessageLabel.setText("It's your turn");
+                    removeAction();
                     game.refresh();
                 }
                 @Override

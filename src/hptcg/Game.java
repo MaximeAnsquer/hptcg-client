@@ -243,7 +243,7 @@ public class Game {
     }
 
     private JLabel yourHandLabel() {
-        yourHandLabel =  new JLabel("Hand: " + 7);
+        yourHandLabel =  new JLabel("Hand: " + 0);
         return yourHandLabel;
     }
 
@@ -484,9 +484,11 @@ public class Game {
     }
 
     void beginYourTurn() {
+        yourActionsLeft = 2;
         if (handsDrawn) {
             draw();
         }
+        dealCreatureDamage();
         yourActionsLeft = 2;
 //        put("game/player1/resetPlayedCards", "");
 //        put("game/player2/resetPlayedCards", "");
@@ -730,13 +732,15 @@ public class Game {
     public void damageOpponent(int n) {
         if (n >= opponentDeck.size()) {
             //TODO: You won
+            JOptionPane.showMessageDialog(frame, "You won the game!");
+            System.exit(0);
         } else {
             String cards = get("game/player" + opponentId + "/popDeckCopy/" + n);
             for (String cardNbString: cards.split(",")) {
                 Card card = opponentDeck.get(Integer.parseInt(cardNbString));
                 card.setDisabled(true);
                 opponentDiscardPile.add(card);
-                opponentDeck.remove(card);
+                opponentDeck.remove(Integer.parseInt(cardNbString));
             }
         }
         refresh();
@@ -745,13 +749,15 @@ public class Game {
     public void takeDamage(int n) {
         if (n >= yourDeck.size()) {
             //TODO: You lost
+            JOptionPane.showMessageDialog(frame, "You lost the game.");
+            System.exit(0);
         } else {
             String cards = get("game/player" + yourId + "/popDeck/" + n);
             for (String cardNbString: cards.split(",")) {
                 Card card = yourDeck.get(Integer.parseInt(cardNbString));
                 card.setDisabled(true);
                 yourDiscardPile.add(card);
-                yourDeck.remove(card);
+                yourDeck.remove(Integer.parseInt(cardNbString));
             }
         }
         refresh();
@@ -759,5 +765,31 @@ public class Game {
 
     public int getYourHandSize() {
         return handPanel.getComponentCount();
+    }
+
+    private void dealCreatureDamage() {
+        int total = 0;
+        for (Component component: yourCreaturesPanel.getComponents()) {
+            Creature creature = (Creature) component;
+            damageOpponent(creature.damage);
+            total += creature.damage;
+        }
+        if (total > 0) {
+            addMessage("Opponent takes " + total + " creature damage.");
+        }
+        refresh();
+    }
+
+    public void takeCreatureDamage() {
+        int total = 0;
+        for (Component component: opponentCreaturesPanel.getComponents()) {
+            Creature creature = (Creature) component;
+            takeDamage(creature.damage);
+            total += creature.damage;
+        }
+        if (total > 0) {
+            addMessage("You take " + total + " creature damage.");
+        }
+        refresh();
     }
 }
