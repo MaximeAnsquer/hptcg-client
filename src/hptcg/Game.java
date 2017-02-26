@@ -57,10 +57,13 @@ public class Game {
     JLabel opponentHandLabel;
     JLabel yourDeckLabel;
     JLabel opponentDeckLabel;
-    int opponentHandSize = 7;
+    int opponentHandSize = 0;
     Map<Integer, Card> yourDeck;
     Map<Integer, Card> opponentDeck;
     private JScrollPane messageScrollPane;
+    public int yourActionsLeft = 0;
+    private JLabel yourActionsLeftLabel;
+    private boolean handsDrawn;
 
     public Game() {
         cardsImageIcons = new Hashtable<>();
@@ -69,6 +72,7 @@ public class Game {
         drawHandCard  = new DrawHand(this);
         yourStartingCharacter = chooseStartingCharacter();
         opponentStartingCharacter = opponentStartingCharacter();
+        yourActionsLeft = 2;
         opponentsLessonsLabels = new Hashtable<>();
         yourLessonsLabels = new Hashtable<>();
         yourLessons = yourLessons();
@@ -196,8 +200,14 @@ public class Game {
         yourInfoPanel.add(createDrawButton());
         yourInfoPanel.add(createYourDeckLabel());
         yourInfoPanel.add(yourHandLabel());
+        yourInfoPanel.add(yourActionsLabel());
         yourInfoPanel.add(yourStartingCharacter);
         return yourInfoPanel;
+    }
+
+    private JLabel yourActionsLabel() {
+        yourActionsLeftLabel = new JLabel("Actions left: " + 2);
+        return yourActionsLeftLabel;
     }
 
     private JButton createDrawButton() {
@@ -223,12 +233,12 @@ public class Game {
     }
 
     private JLabel createYourDeckLabel() {
-        yourDeckLabel =  new JLabel("Deck: " + 53);
+        yourDeckLabel =  new JLabel("Deck: " + 40);
         return yourDeckLabel;
     }
 
     private JLabel opponentDeckLabel() {
-        opponentDeckLabel =  new JLabel("Deck: " + 53);
+        opponentDeckLabel =  new JLabel("Deck: " + 40);
         return opponentDeckLabel;
     }
 
@@ -274,7 +284,7 @@ public class Game {
     }
 
     private void endYourTurn() {
-        endTurnCard.playCard();
+        endTurnCard.applyCardEffect();
     }
 
     private JPanel handAndMainMessagePanels() {
@@ -474,9 +484,12 @@ public class Game {
     }
 
     void beginYourTurn() {
-        savedNbCardsPlayedByOpponent = 0;
-        put("game/player1/resetPlayedCards", "");
-        put("game/player2/resetPlayedCards", "");
+        if (handsDrawn) {
+            draw();
+        }
+        yourActionsLeft = 2;
+//        put("game/player1/resetPlayedCards", "");
+//        put("game/player2/resetPlayedCards", "");
         System.out.println("Beginning your turn");
         yourTurn = true;
         mainMessageLabel.setText("It's your turn");
@@ -505,7 +518,6 @@ public class Game {
     private boolean newCardFromOpponent() {
         int fetchedNbCardsPlayedByOpponent = fetchedNbCardsPlayedByOpponent();
         if (fetchedNbCardsPlayedByOpponent != savedNbCardsPlayedByOpponent) {
-//            System.out.println("New card played by opponent");
             savedNbCardsPlayedByOpponent++;
             return true;
         } else {
@@ -577,6 +589,7 @@ public class Game {
         yourDiscardPileFrame.pack();
         opponentDiscardPileFrame.repaint();
         opponentDiscardPileFrame.pack();
+        yourActionsLeftLabel.setText("Actions left: " + yourActionsLeft);
         frame.repaint();
         frame.pack();
     }
@@ -654,22 +667,11 @@ public class Game {
 
         game.connectToServer();
         game.waitForOpponent();
-
-        game.mainMessageLabel.setText("Drawing hands, please wait...");
-        while(game.getYourHandSize() < 7 || game.opponentHandSize < 7) {
-            if (game.yourTurn) {
-                game.drawHand();
-                game.endYourTurn();
-            } else {
-                if(game.newCardFromOpponent()) {
-                    game.applyOpponentsCard();
-                }
-            }
-            game.waitFor(1200);
-        }
+        game.drawHands();
 
         while(true) {
             game.waitFor(100);  // delay so that the yourTurn variable knows it changed
+            game.checkActionsLeft();
             while(!game.yourTurn) {
                 if(game.newCardFromOpponent()) {
                     game.applyOpponentsCard();
@@ -679,8 +681,30 @@ public class Game {
         }
     }
 
+    private void checkActionsLeft() {
+        if (yourActionsLeft <= 0) {
+            this.endYourTurn();
+        }
+    }
+
+    private void drawHands() {
+        mainMessageLabel.setText("Drawing hands, please wait...");
+        while(getYourHandSize() < 7 || opponentHandSize < 7) {
+            if (yourTurn) {
+                drawHand();
+                endYourTurn();
+            } else {
+                if(newCardFromOpponent()) {
+                    applyOpponentsCard();
+                }
+            }
+            waitFor(1200);
+        }
+        handsDrawn = true;
+    }
+
     private void drawHand() {
-        drawHandCard.playCard();
+        drawHandCard.applyCardEffect();
     }
 
     public String getOpponentTarget() {

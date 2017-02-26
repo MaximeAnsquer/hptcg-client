@@ -14,8 +14,8 @@ public class TakeRoot extends Spell {
         super(game, 2, TRANSFIGURATION); //TODO
     }
 
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.put("game/player" + game.opponentId + "/target", "");
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Your opponent is choosing a creature to discard.");

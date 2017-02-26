@@ -7,6 +7,9 @@ public class EmptyCharacter extends Character {
     }
 
     @Override
+    protected void removeAction() {}
+
+    @Override
     public boolean canBePlayed() {
         return false;
     }

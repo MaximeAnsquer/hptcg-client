@@ -18,8 +18,8 @@ public class Accio extends Spell {
     }
 
     @Override
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         String previousMainMessage = game.mainMessageLabel.getText();
         for (Card card: game.getAllCards()) {
             card.setDisabled(true);

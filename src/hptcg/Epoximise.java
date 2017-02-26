@@ -9,8 +9,8 @@ public class Epoximise extends Spell {
         super(game, 2, TRANSFIGURATION);
     }
 
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.removeLesson(CHARMS, true);
     }
 

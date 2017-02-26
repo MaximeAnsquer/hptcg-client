@@ -8,6 +8,9 @@ public class EndTurn extends Card {
     }
 
     @Override
+    protected void removeAction() {}
+
+    @Override
     public boolean canBePlayed() {
         return false;
     }
@@ -19,10 +22,11 @@ public class EndTurn extends Card {
     }
 
     @Override
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.yourTurn = false;
         game.mainMessageLabel.setText("It's your opponent's turn");
+        game.yourActionsLeft = 2;
         game.refresh();
     }
 }

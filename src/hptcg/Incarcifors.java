@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static hptcg.LessonType.TRANSFIGURATION;
 
@@ -16,8 +15,8 @@ public class Incarcifors extends Spell {
     }
 
     @Override
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.put("game/player" + game.yourId + "/target", "");
         game.mainMessageLabel.setText("Choose target creature.");
         game.refresh();

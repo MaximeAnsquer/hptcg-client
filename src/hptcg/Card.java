@@ -3,8 +3,6 @@ package hptcg;
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
-import java.net.URL;
 
 public abstract class Card extends JLabel implements ICard {
 
@@ -75,11 +73,18 @@ public abstract class Card extends JLabel implements ICard {
     }
 
     public void playCard() {
+        applyCardEffect();
+        removeAction();
+    }
+
+    protected abstract void removeAction();
+
+    public void applyCardEffect() {
         game.get("game/player" + game.getYourId() + "/play/" + cardName);
         setDisabled(true);
         game.removeFromHand(this);
         game.addMessage("You played: " + cardName);
-//        System.out.println("You played: " + cardName);
+        System.out.println("You played: " + cardName);
         game.refresh();
     }
 

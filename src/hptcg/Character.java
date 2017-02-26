@@ -6,4 +6,8 @@ public abstract class Character extends Card {
         super(game);
     }
 
+    @Override
+    protected void removeAction() {
+        game.yourActionsLeft -= 2;
+    }
 }

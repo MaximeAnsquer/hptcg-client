@@ -11,8 +11,8 @@ public abstract class Spell extends Card {
         this.powerTypeNeeded = powerTypeNeeded;
     }
 
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.lastSpellPlayedLabel.setIcon(game.createImage(cardName, 1.3));
         game.lastSpellPlayedLabel.setToolTipText("<html><img src=\"file:"+new File("src/hptcg/images/" + cardName + ".jpg").toString()+"\">");
         setDisabled(true);
@@ -35,5 +35,10 @@ public abstract class Spell extends Card {
             totalPower += game.totalPower.get(lessonType);
         }
         return hasPowerTypeNeeded && totalPower >= powerNeeded;
+    }
+
+    @Override
+    protected void removeAction() {
+        game.yourActionsLeft--;
     }
 }

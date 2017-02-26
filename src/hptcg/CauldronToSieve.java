@@ -1,6 +1,5 @@
 package hptcg;
 
-import static hptcg.LessonType.CARE_OF_MAGICAL_CREATURES;
 import static hptcg.LessonType.POTIONS;
 import static hptcg.LessonType.TRANSFIGURATION;
 
@@ -10,8 +9,8 @@ public class CauldronToSieve extends Spell {
         super(game, 2, TRANSFIGURATION);
     }
 
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.removeLesson(POTIONS, true);
     }
 

@@ -7,8 +7,8 @@ public class Stupefy extends Spell {
     }
 
     @Override
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.damageOpponent(5);
     }
 

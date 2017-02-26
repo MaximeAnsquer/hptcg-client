@@ -15,8 +15,8 @@ public class Vermillious extends Spell {
     }
 
     @Override
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Please choose a target.");
         game.put("game/player" + game.yourId + "/target", "");

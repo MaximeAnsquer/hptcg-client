@@ -48,8 +48,13 @@ public class Creature extends Card {
     }
 
     @Override
-    public void playCard() {
-        super.playCard();
+    protected void removeAction() {
+        game.yourActionsLeft--;
+    }
+
+    @Override
+    public void applyCardEffect() {
+        super.applyCardEffect();
         for (int i=0; i<lessonsToDiscard; i++) {
             game.removeLesson(CARE_OF_MAGICAL_CREATURES, false);
         }

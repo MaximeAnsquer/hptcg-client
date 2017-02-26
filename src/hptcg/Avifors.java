@@ -9,8 +9,8 @@ public class Avifors extends Spell {
         super(game, 2, TRANSFIGURATION);
     }
 
-    public void playCard() {
-        super.playCard();
+    public void applyCardEffect() {
+        super.applyCardEffect();
         game.removeLesson(CARE_OF_MAGICAL_CREATURES, true);
     }
 

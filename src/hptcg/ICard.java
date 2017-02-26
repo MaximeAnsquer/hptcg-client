@@ -7,7 +7,7 @@ public interface ICard {
    */
   boolean canBePlayed();
 
-  void playCard();
+  void applyCardEffect();
 
   void applyOpponentPlayed();
 }
