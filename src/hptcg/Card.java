@@ -87,7 +87,7 @@ public abstract class Card extends JLabel implements ICard {
         setDisabled(true);
         game.removeFromHand(this);
         game.addMessage("You played: " + cardName);
-        System.out.println("You played: " + cardName);
+//        System.out.println("You played: " + cardName);
         game.refresh();
     }
 

@@ -50,7 +50,7 @@ public class Game {
     JPanel yourCreaturesPanel;
     JPanel opponentCreaturesPanel;
     Card endTurnCard;
-    Card drawCard;
+    Draw drawCard;
     JButton yourDiscardPileButton;
     JButton opponentDiscardPileButton;
     JLabel yourHandLabel;
@@ -64,12 +64,14 @@ public class Game {
     public int yourActionsLeft = 0;
     private JLabel yourActionsLeftLabel;
     private boolean handsDrawn;
+    Card creatureDamagePhase;
 
     public Game() {
         cardsImageIcons = new Hashtable<>();
         endTurnCard  = new EndTurn(this);
         drawCard  = new Draw(this);
         drawHandCard  = new DrawHand(this);
+        creatureDamagePhase = new CreatureDamagePhase(this);
         yourStartingCharacter = chooseStartingCharacter();
         opponentStartingCharacter = opponentStartingCharacter();
         yourActionsLeft = 2;
@@ -163,7 +165,8 @@ public class Game {
                 null,
                 new String[]{"Hermione Granger", "Draco Malfoy"},
                 "Hermione Granger");
-        Card character = choice == 0 ? new HermioneGranger(this) : new DracoMalfoy(this);
+        Character character = choice == 0 ? new HermioneGranger(this) : new DracoMalfoy(this);
+        character.inPlay = true;
         character.setImageScale(1.25);
         return character;
     }
@@ -196,7 +199,7 @@ public class Game {
         JPanel yourInfoPanel = new JPanel();
         yourInfoPanel.setLayout(new BoxLayout(yourInfoPanel, BoxLayout.Y_AXIS));
         yourInfoPanel.add(yourDiscardPileButton());
-        yourInfoPanel.add(endYourTurnButton()); //TODO: remove
+//        yourInfoPanel.add(endYourTurnButton());
         yourInfoPanel.add(createDrawButton());
         yourInfoPanel.add(createYourDeckLabel());
         yourInfoPanel.add(yourHandLabel());
@@ -484,19 +487,19 @@ public class Game {
     }
 
     void beginYourTurn() {
-        yourActionsLeft = 2;
         if (handsDrawn) {
             draw();
         }
-        dealCreatureDamage();
         yourActionsLeft = 2;
 //        put("game/player1/resetPlayedCards", "");
 //        put("game/player2/resetPlayedCards", "");
         System.out.println("Beginning your turn");
         yourTurn = true;
         mainMessageLabel.setText("It's your turn");
-        frame.repaint();
-        frame.pack();
+        if (yourCreaturesPanel.getComponents().length > 0) {
+            creatureDamagePhase.playCard();
+        }
+        refresh();
     }
 
     private void connectToServer() {
@@ -767,29 +770,4 @@ public class Game {
         return handPanel.getComponentCount();
     }
 
-    private void dealCreatureDamage() {
-        int total = 0;
-        for (Component component: yourCreaturesPanel.getComponents()) {
-            Creature creature = (Creature) component;
-            damageOpponent(creature.damage);
-            total += creature.damage;
-        }
-        if (total > 0) {
-            addMessage("Opponent takes " + total + " creature damage.");
-        }
-        refresh();
-    }
-
-    public void takeCreatureDamage() {
-        int total = 0;
-        for (Component component: opponentCreaturesPanel.getComponents()) {
-            Creature creature = (Creature) component;
-            takeDamage(creature.damage);
-            total += creature.damage;
-        }
-        if (total > 0) {
-            addMessage("You take " + total + " creature damage.");
-        }
-        refresh();
-    }
 }

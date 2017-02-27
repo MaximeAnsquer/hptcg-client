@@ -7,7 +7,12 @@ public class DracoMalfoy extends Character {
     }
 
     @Override
-    public boolean canBePlayed() {
-        return true;
+    protected void useCharacterPower() {
+
+    }
+
+    @Override
+    protected boolean powerCanBePlayer() {
+        return false;
     }
 }

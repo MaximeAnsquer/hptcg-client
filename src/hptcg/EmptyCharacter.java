@@ -7,10 +7,15 @@ public class EmptyCharacter extends Character {
     }
 
     @Override
+    protected void useCharacterPower() {
+
+    }
+
+    @Override
     protected void removeAction() {}
 
     @Override
-    public boolean canBePlayed() {
+    protected boolean powerCanBePlayer() {
         return false;
     }
 }
