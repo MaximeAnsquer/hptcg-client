@@ -19,7 +19,7 @@ public class Draw extends Card {
         for (String cardNbString: cards.split(",")) {
             Card card = game.yourDeck.get(Integer.parseInt(cardNbString));
             game.yourDeck.remove(Integer.parseInt(cardNbString));
-            game.handPanel.add(card);
+            game.yourHand.add(card);
         }
         game.refresh();
     }
@@ -30,14 +30,16 @@ public class Draw extends Card {
         game.refresh();
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
         String cards = game.get("game/player" + game.opponentId + "/popDeckCopy/" + 1);
         for (String cardNbString: cards.split(",")) {
             Card card = game.opponentDeck.get(Integer.parseInt(cardNbString));
+            card.setDisabled(true);
             game.opponentDeck.remove(Integer.parseInt(cardNbString));
-            game.opponentHandSize++;
+            game.opponentHand.add(card);
         }
         game.refresh();
     }

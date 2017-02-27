@@ -32,7 +32,7 @@ public class Accio extends Spell {
                         lessons += ((Card) card).getCardName() + ",";
                         card.removeMouseListener(this);
                         game.yourDiscardPile.remove(card);
-                        game.handPanel.add(card);
+                        game.yourHand.add(card);
                         ((Card) card).setDisabled(false);
                         nbLessonSelected++;
                         game.mainMessageLabel.setText("Choose two lessons from your discard pile (" + nbLessonSelected + "/2)");
@@ -86,7 +86,6 @@ public class Accio extends Spell {
                         .filter(card -> card.getClass().getSimpleName().equals(lesson))
                         .findFirst().get();
                 game.opponentDiscardPile.remove(lessonToRemove);
-                game.opponentHandSize++;
             }
             game.mainMessageLabel.setText(previousMainMessage);
             game.put("game/player" + game.yourId + "/target", "");

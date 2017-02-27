@@ -7,6 +7,7 @@ public abstract class Character extends Card {
     protected Character(Game game) {
         super(game);
         removeActionAfterPlay = false;
+        disableAfterPlayer = false;
     }
 
     @Override
@@ -15,7 +16,7 @@ public abstract class Character extends Card {
         if (inPlay) {
             useCharacterPower();
         } else {
-            game.handPanel.remove(this);
+            game.yourHand.remove(this);
             game.yourPlayedCard.add(this);
             inPlay = true;
         }

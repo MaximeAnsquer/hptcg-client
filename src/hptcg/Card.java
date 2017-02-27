@@ -17,6 +17,7 @@ public abstract class Card extends JLabel implements ICard {
     protected String cardName;
     protected boolean wasDisabled;
     protected boolean removeActionAfterPlay = true;
+    protected boolean disableAfterPlayer = true;
 
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
@@ -54,7 +55,8 @@ public abstract class Card extends JLabel implements ICard {
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (game.yourTurn && canBePlayed() && !disabled) {
+                boolean canBePlayed = canBePlayed();
+                if (game.yourTurn && canBePlayed && !disabled) {
                     playCard();
                 }
             }
@@ -84,7 +86,9 @@ public abstract class Card extends JLabel implements ICard {
 
     public void applyCardEffect() {
         game.get("game/player" + game.getYourId() + "/play/" + cardName);
-        setDisabled(true);
+        if (disableAfterPlayer) {
+            setDisabled(true);
+        }
         game.removeFromHand(this);
         game.addMessage("You played: " + cardName);
 //        System.out.println("You played: " + cardName);
@@ -93,9 +97,6 @@ public abstract class Card extends JLabel implements ICard {
 
     public void applyOpponentPlayed() {
         setDisabled(true);
-        if(realCard) {
-            game.opponentHandSize--;
-        }
     }
 
     public void setImageScale(double scale) {
@@ -112,5 +113,9 @@ public abstract class Card extends JLabel implements ICard {
 
     public boolean getWasDisabled() {
         return wasDisabled;
+    }
+
+    public void removeLastMouseListener() {
+        removeMouseListener(getMouseListeners()[getMouseListeners().length - 1]);
     }
 }

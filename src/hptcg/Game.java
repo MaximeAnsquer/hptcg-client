@@ -19,7 +19,7 @@ public class Game {
 
     private final DrawHand drawHandCard;
     public JFrame frame;
-    public JPanel handPanel;
+    public JPanel yourHand;
     public JPanel boardPanel;
     public JPanel yourPlayedCard;
     public JPanel opponentsCards;
@@ -57,7 +57,6 @@ public class Game {
     JLabel opponentHandLabel;
     JLabel yourDeckLabel;
     JLabel opponentDeckLabel;
-    int opponentHandSize = 0;
     Map<Integer, Card> yourDeck;
     Map<Integer, Card> opponentDeck;
     private JScrollPane messageScrollPane;
@@ -65,6 +64,10 @@ public class Game {
     private JLabel yourActionsLeftLabel;
     private boolean handsDrawn;
     Card creatureDamagePhase;
+    public JFrame opponentHandFrame;
+    public Container opponentHand;
+    private JButton opponentHandButton;
+    private boolean canSeeOpponentHand = false;
 
     public Game() {
         cardsImageIcons = new Hashtable<>();
@@ -204,8 +207,29 @@ public class Game {
         yourInfoPanel.add(createYourDeckLabel());
         yourInfoPanel.add(yourHandLabel());
         yourInfoPanel.add(yourActionsLabel());
+        yourInfoPanel.add(createOpponentHandButton());
         yourInfoPanel.add(yourStartingCharacter);
         return yourInfoPanel;
+    }
+
+    private JButton createOpponentHandButton() {
+        opponentHandFrame = new JFrame("Opponent's hand");
+        opponentHandFrame.setLocationRelativeTo(null);
+        opponentHandFrame.setResizable(false);
+        opponentHandFrame.getContentPane();
+        opponentHand = new JPanel();
+        opponentHand.setLayout(new BoxLayout(opponentHand, BoxLayout.X_AXIS));
+        JScrollPane scrollPane = new JScrollPane(opponentHand);
+        scrollPane.setPreferredSize(new Dimension(700, 200));
+        opponentHandFrame.getContentPane().add(scrollPane);
+        opponentHandButton = new JButton("Opponent's hand");
+        opponentHandButton.addActionListener(e -> {
+            opponentHandFrame.repaint();
+            opponentHandFrame.pack();
+            opponentHandFrame.setVisible(true);
+        });
+        opponentHandButton.setVisible(false);
+        return opponentHandButton;
     }
 
     private JLabel yourActionsLabel() {
@@ -372,9 +396,9 @@ public class Game {
     }
 
     private JScrollPane handPanel() {
-        handPanel = new JPanel();
-        handPanel.setLayout(new BoxLayout(handPanel, BoxLayout.X_AXIS));
-        return new JScrollPane(handPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        yourHand = new JPanel();
+        yourHand.setLayout(new BoxLayout(yourHand, BoxLayout.X_AXIS));
+        return new JScrollPane(yourHand, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     }
 
     private void draw() {
@@ -580,12 +604,12 @@ public class Game {
     }
 
     public void removeFromHand(Card card) {
-        handPanel.remove(card);
+        yourHand.remove(card);
     }
 
     public void refresh() {
-        yourHandLabel.setText("Hand: " + handPanel.getComponents().length);
-        opponentHandLabel.setText("Hand: " + opponentHandSize);
+        yourHandLabel.setText("Hand: " + yourHand.getComponents().length);
+        opponentHandLabel.setText("Hand: " + opponentHand.getComponents().length);
         yourDeckLabel.setText("Deck: " + yourDeck.size());
         opponentDeckLabel.setText("Deck: " + opponentDeck.size());
         yourDiscardPileButton.setText("Discard pile " + "(" + yourDiscardPile.getComponents().length + ")");
@@ -595,6 +619,9 @@ public class Game {
         opponentDiscardPileFrame.repaint();
         opponentDiscardPileFrame.pack();
         yourActionsLeftLabel.setText("Actions left: " + yourActionsLeft);
+        if (canSeeOpponentHand) {
+            opponentHandButton.setVisible(true);
+        }
         frame.repaint();
         frame.pack();
     }
@@ -638,7 +665,7 @@ public class Game {
 
     public ArrayList<Card> getAllCards() {
         ArrayList<Card> cards = new ArrayList<>();
-        for(Component card: handPanel.getComponents()) {
+        for(Component card: yourHand.getComponents()) {
             cards.add((Card) card);
         }
         for(Component card: yourCreaturesPanel.getComponents()) {
@@ -694,7 +721,7 @@ public class Game {
 
     private void drawHands() {
         mainMessageLabel.setText("Drawing hands, please wait...");
-        while(getYourHandSize() < 7 || opponentHandSize < 7) {
+        while(getYourHandSize() < 7 || opponentHand.getComponents().length < 7) {
             if (yourTurn) {
                 drawHand();
                 endYourTurn();
@@ -729,6 +756,7 @@ public class Game {
         for (Card card: getAllCards()) {
             card.setDisabled(false);
         }
+        addMessage("Target: " + target);
         return target;
     }
 
@@ -767,7 +795,7 @@ public class Game {
     }
 
     public int getYourHandSize() {
-        return handPanel.getComponentCount();
+        return yourHand.getComponentCount();
     }
 
 }

@@ -33,7 +33,7 @@ public class HagridAndTheStranger extends Spell {
                         ((Card) card).setDisabled(false);
                         game.yourDiscardPile.remove(card);
                         ((Card) card).setDisabled(false);
-                        game.handPanel.add(card);
+                        game.yourHand.add(card);
                         game.put("game/player" + game.yourId + "/target", creatureChosen);
                         game.mainMessageLabel.setText(previousMainMessage);
                         game.yourDiscardPileFrame.setVisible(false);
@@ -76,7 +76,6 @@ public class HagridAndTheStranger extends Spell {
                     .filter(card -> card.getClass().getSimpleName().equals(target))
                     .findFirst().get();
             game.opponentDiscardPile.remove(creatureToRemove);
-            game.opponentHandSize++;
             game.mainMessageLabel.setText(previousMainMessage);
             game.put("game/player" + game.yourId + "/target", "");
             game.refresh();

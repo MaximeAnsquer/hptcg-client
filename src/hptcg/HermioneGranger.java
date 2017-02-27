@@ -24,7 +24,7 @@ public class HermioneGranger extends Character {
             card.setWasDisabled(card.isDisabled());
             card.setDisabled(true);
         }
-        List<Component> lessons = Arrays.stream(game.handPanel.getComponents()).filter(component -> {
+        List<Component> lessons = Arrays.stream(game.yourHand.getComponents()).filter(component -> {
             Card card = (Card) component;
             return card.type.equals(Type.LESSON);
         }).collect(Collectors.toList());
