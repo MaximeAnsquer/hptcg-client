@@ -14,6 +14,7 @@ public class GameManager {
     //        public static String serverUrl = "http://hptcg-server.herokuapp.com/";
     public static String serverUrl = "http://localhost:8080/";
     private final JFrame frame;
+    private Font font = new Font("Arial", Font.PLAIN, 25);
 
     private JPanel buttonPanel;
 
@@ -23,13 +24,27 @@ public class GameManager {
 
     public GameManager() {
         frame = new JFrame("Game manager");
-        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        Rectangle availableSpace = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        int availableWidth = (int) availableSpace.getWidth();
+        int availableHeight = (int) availableSpace.getHeight();
+        frame.setPreferredSize(new Dimension(availableWidth, availableHeight));
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new BorderLayout());
-        contentPane.add(createButtonPanel(), BorderLayout.CENTER);
+        contentPane.add(centerPanel(), BorderLayout.CENTER);
         contentPane.add(createBottomButtons(), BorderLayout.SOUTH);
         refreshServerGames();
+    }
+
+    private JPanel centerPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        JLabel label = new JLabel("Available games: ");
+        label.setFont(font);
+        panel.add(label, BorderLayout.NORTH);
+        panel.add(createButtonPanel(), BorderLayout.CENTER);
+        return panel;
     }
 
     private JPanel createBottomButtons() {
@@ -42,6 +57,7 @@ public class GameManager {
 
     private JButton createCreateGameButton() {
         JButton button = new JButton("Create game");
+        button.setFont(font);
         button.addActionListener(e -> {
             String name = JOptionPane.showInputDialog(frame, "Please enter a name");
             String id = put("gameManager/games", name);
@@ -53,13 +69,14 @@ public class GameManager {
 
     private JButton createRefreshButton() {
         JButton button = new JButton("Refresh");
+        button.setFont(font);
         button.addActionListener(e -> refreshServerGames());
         return button;
     }
 
     private JScrollPane createButtonPanel() {
         buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setLayout(new GridLayout(0, 1));
         return new JScrollPane(buttonPanel);
     }
 
@@ -72,12 +89,16 @@ public class GameManager {
                 String id = gameString.split(":")[0];
                 String name = gameString.split(":")[1];
                 JButton button = new JButton(name);
-                button.addActionListener(e -> {
-                    new Thread(() -> new Game(Integer.parseInt(id)).play()).start();
-                });
+                button.setFont(font);
+                button.addActionListener(e -> new Thread(() -> new Game(Integer.parseInt(id)).play()).start());
                 buttonPanel.add(button);
             }
+        } else {
+            JLabel label = new JLabel("No game available");
+            label.setFont(font);
+            buttonPanel.add(label);
         }
+        buttonPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         frame.repaint();
         frame.pack();
     }
