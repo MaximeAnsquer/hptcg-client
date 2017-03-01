@@ -5,6 +5,8 @@ public class Draw extends Card {
     protected Draw(Game game) {
         super(game);
         this.realCard = false;
+        youPlayedMessage = "You draw a card";
+        opponentPlayedMessage = "Opponent draws a card";
     }
 
     @Override

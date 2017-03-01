@@ -40,9 +40,7 @@ public class HermioneGranger extends Character {
                     } else {
                         for (Component component: lessons) {
                             Lesson lesson = (Lesson) component;
-                            System.out.println("length before: " + lesson.getMouseListeners().length);
                             lesson.removeMouseListener(lesson.getMouseListeners()[lesson.getMouseListeners().length - 1]);
-                            System.out.println("length after: " + lesson.getMouseListeners().length);
                         }
                         for (Card card: game.getAllCards()) {
                             card.setDisabled(card.getWasDisabled());
@@ -70,6 +68,20 @@ public class HermioneGranger extends Character {
         for (LessonType lessonType: game.yourLessons.keySet()) {
             nbLessonsInPlay += game.yourLessons.get(lessonType);
         }
-        return nbLessonsInPlay >= 2;
+        int nbLessonsInHand= 0;
+        for (Component component: game.yourHand.getComponents()) {
+            Card card = (Card) component;
+            if (card.type.equals(Type.LESSON)) {
+                nbLessonsInHand++;
+            }
+        }
+        return nbLessonsInPlay >= 2 && nbLessonsInHand >= 2;
+    }
+
+    public static class ActivationEffect extends CardEffect {
+
+        protected ActivationEffect(Game game) {
+            super(game, "You use Hermione Granger's capacity", "Opponent uses Hermione Granger's capacity");
+        }
     }
 }

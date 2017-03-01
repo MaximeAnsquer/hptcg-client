@@ -20,7 +20,7 @@ public class Vermillious extends Spell {
         super.applyCardEffect();
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Please choose a target.");
-        game.put("game/player" + game.yourId + "/target", "");
+        game.put("game/player" + game.yourId + "/target1", "");
         List<Card> possibleTargets = new ArrayList<>();
         possibleTargets.add(game.opponentStartingCharacter);
         possibleTargets.addAll(game.getOpponentCreatures());
@@ -36,7 +36,7 @@ public class Vermillious extends Spell {
                         c.removeMouseListener(this);
                         c.setDisabled(c.getWasDisabled());
                     }
-                    game.put("game/player" + game.yourId + "/target", card.getCardName());
+                    game.put("game/player" + game.yourId + "/target1", card.getCardName());
                     game.addMessage("You targeted: " + card.getCardName());
                     if (card == game.opponentStartingCharacter) {
                         game.damageOpponent(3);
@@ -71,9 +71,9 @@ public class Vermillious extends Spell {
     @Override
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
-        String target = game.getOpponentTarget();
+        String target = game.getOpponentTarget(1);
         if (target.equals(game.yourStartingCharacter.getCardName())) {
-            game.addMessage("Your opponent targeted you.");
+            game.addMessage("Opponent targeted you.");
             game.takeDamage(3);
         } else {
             //TODO: Pas terrible, vire la première créature qui a le nom ciblé, mais pas forcément celle qui a été ciblée (s'il il y en plusieurs avec le même nom).
@@ -81,7 +81,7 @@ public class Vermillious extends Spell {
                     .filter(card -> card.getClass().getSimpleName().equals(target))
                     .findFirst();
             Creature creature = (Creature) component.get();
-            game.addMessage("Your opponent targeted: " + creature.getCardName());
+            game.addMessage("Opponent targeted: " + creature.getCardName());
             creature.dealDamage(3);
         }
     }

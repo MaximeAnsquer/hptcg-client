@@ -5,6 +5,8 @@ public class EndTurn extends Card {
     protected EndTurn(Game game) {
         super(game);
         this.realCard = false;
+        youPlayedMessage = "End of your turn";
+        opponentPlayedMessage = "Beginning of your turn";
     }
 
     @Override

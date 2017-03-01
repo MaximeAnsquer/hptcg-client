@@ -1,6 +1,7 @@
 package hptcg;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -18,12 +19,15 @@ public abstract class Card extends JLabel implements ICard {
     protected boolean wasDisabled;
     protected boolean removeActionAfterPlay = true;
     protected boolean disableAfterPlayer = true;
+    protected String youPlayedMessage;
+    protected String opponentPlayedMessage;
+    protected boolean disabled;
+    protected boolean inPlay = false;
+    protected String cardEffectName;
 
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
-
-    protected boolean disabled;
 
     @Override
     public void setText(String text) {
@@ -85,18 +89,36 @@ public abstract class Card extends JLabel implements ICard {
     protected abstract void removeAction();
 
     public void applyCardEffect() {
-        game.get("game/player" + game.getYourId() + "/play/" + cardName);
+        if (inPlay) {
+            game.get("game/player" + game.getYourId() + "/play/" + cardEffectName);
+        } else {
+            game.get("game/player" + game.getYourId() + "/play/" + cardName);
+            game.removeFromHand(this);
+        }
         if (disableAfterPlayer) {
             setDisabled(true);
         }
-        game.removeFromHand(this);
-        game.addMessage("You played: " + cardName);
-//        System.out.println("You played: " + cardName);
+        if (realCard & !inPlay) {
+            game.addMessage("You played: " + cardName);
+        } else {
+            game.addMessage(youPlayedMessage);
+        }
         game.refresh();
     }
 
     public void applyOpponentPlayed() {
         setDisabled(true);
+        if (realCard && !inPlay) {
+            Card cardToRemove = null;
+            for (Component component : game.opponentHand.getComponents()) {
+                Card card = (Card) component;
+                if (card.getCardName().equals(this.getCardName())) {
+                    cardToRemove = card;
+                    break;
+                }
+            }
+            game.opponentHand.remove(cardToRemove);
+        }
     }
 
     public void setImageScale(double scale) {

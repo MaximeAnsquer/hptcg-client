@@ -18,7 +18,7 @@ public class Incarcifors extends Spell {
     @Override
     public void applyCardEffect() {
         super.applyCardEffect();
-        game.put("game/player" + game.yourId + "/target", "");
+        game.put("game/player" + game.yourId + "/target1", "");
         game.mainMessageLabel.setText("Choose target creature.");
         game.refresh();
         for (Card card: game.getAllCards()) {
@@ -36,7 +36,7 @@ public class Incarcifors extends Spell {
                         }
                     }
                     String target = finalCard.getCardName();
-                    game.put("game/player" + game.yourId + "/target", target);
+                    game.put("game/player" + game.yourId + "/target1", target);
                     finalCard.setDisabled(true);
                     game.opponentDiscardPile.add(finalCard);
                     game.opponentCreaturesPanel.remove(finalCard);
@@ -71,13 +71,13 @@ public class Incarcifors extends Spell {
     @Override
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
-        String target = game.getOpponentTarget();
+        String target = game.getOpponentTarget(1);
         //TODO: Pas terrible, vire la première créature qui a le nom ciblé, mais pas forcément celle qui a été ciblée (s'il il y en plusieurs avec le même nom).
         Optional<Component> creatureToRemove = Arrays.stream(game.yourCreaturesPanel.getComponents())
                 .filter(card -> card.getClass().getSimpleName().equals(target))
                 .findFirst();
         Card cardCreatureToRemove = (Card) creatureToRemove.get();
-        game.addMessage("Your opponent targeted: " + cardCreatureToRemove.getCardName());
+        game.addMessage("Opponent targeted: " + cardCreatureToRemove.getCardName());
         cardCreatureToRemove.setDisabled(true);
         game.yourDiscardPile.add(cardCreatureToRemove);
         game.yourCreaturesPanel.remove(cardCreatureToRemove);

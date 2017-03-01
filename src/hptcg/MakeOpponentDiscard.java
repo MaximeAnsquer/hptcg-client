@@ -11,6 +11,8 @@ public class MakeOpponentDiscard extends Card {
     protected MakeOpponentDiscard(Game game) {
         super(game);
         realCard = false;
+        youPlayedMessage = "Opponent discards a card";
+        opponentPlayedMessage = "You discard a card";
     }
 
     @Override
@@ -35,7 +37,7 @@ public class MakeOpponentDiscard extends Card {
                         Card card = (Card) component;
                         card.removeLastMouseListener();
                     }
-                    game.put("game/player" + game.yourId + "/target", card.getCardName());
+                    game.put("game/player" + game.yourId + "/target2", card.getCardName());
                     card.setDisabled(true);
                     game.opponentHand.remove(card);
                     game.opponentDiscardPile.add(card);
@@ -64,7 +66,7 @@ public class MakeOpponentDiscard extends Card {
                     Card card = (Card) component;
                     card.removeLastMouseListener();
                 }
-                game.put("game/player" + game.yourId + "/target", "nothing");
+                game.put("game/player" + game.yourId + "/target2", "nothing");
                 game.yourActionsLeft--;
                 game.mainMessageLabel.setText(previousMainMessage);
                 game.refresh();
@@ -76,7 +78,8 @@ public class MakeOpponentDiscard extends Card {
     @Override
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
-        String target = game.getOpponentTarget();
+        String target = game.getOpponentTarget(2);
+        System.out.println("target: " + target);
         if (!target.equals("nothing")) {
             Card cardToDiscard = null;
             for (Component component: game.yourHand.getComponents()) {
@@ -89,7 +92,7 @@ public class MakeOpponentDiscard extends Card {
             }
             game.yourHand.remove(cardToDiscard);
             game.yourDiscardPile.add(cardToDiscard);
-            game.put("game/player" + game.opponentId + "/target", "");
+            game.put("game/player" + game.opponentId + "/target1", "");
             game.refresh();
         }
     }

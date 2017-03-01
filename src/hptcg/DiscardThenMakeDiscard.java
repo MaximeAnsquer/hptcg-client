@@ -9,12 +9,14 @@ public class DiscardThenMakeDiscard extends Card {
     protected DiscardThenMakeDiscard(Game game) {
         super(game);
         realCard = false;
+        youPlayedMessage = "You discard a card";
+        opponentPlayedMessage = "Opponent discards a card";
     }
 
     @Override
     public void applyCardEffect() {
         super.applyCardEffect();
-        game.put("game/player" + game.yourId + "/target", "");
+        game.put("game/player" + game.yourId + "/target1", "");
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Choose a card to discard.");
         for (Card card: game.getAllCards()) {
@@ -26,7 +28,7 @@ public class DiscardThenMakeDiscard extends Card {
             card.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    game.put("game/player" + game.yourId + "/target", card.getCardName());
+                    game.put("game/player" + game.yourId + "/target1", card.getCardName());
                     for (Component component: game.yourHand.getComponents()) {
                         ((Card) component).removeLastMouseListener();
                     }
@@ -55,10 +57,12 @@ public class DiscardThenMakeDiscard extends Card {
     @Override
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
-        String target = game.getOpponentTarget();
+        String target = game.getOpponentTarget(1);
         Card cardToRemove = null;
+        System.out.println("Opponent hand: ");
         for (Component component: game.opponentHand.getComponents()) {
             Card card = (Card) component;
+            System.out.println(card);
             if (card.getCardName().equals(target)) {
                 card.setDisabled(true);
                 cardToRemove = card;
@@ -67,7 +71,7 @@ public class DiscardThenMakeDiscard extends Card {
         }
         game.opponentHand.remove(cardToRemove);
         game.opponentDiscardPile.add(cardToRemove);
-        game.put("game/player" + game.opponentId + "/target", "");
+        game.put("game/player" + game.opponentId + "/target1", "");
         game.refresh();
     }
 

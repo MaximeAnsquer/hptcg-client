@@ -20,4 +20,21 @@ public class DracoMalfoy extends Character {
         return game.yourHand.getComponents().length > 0;
     }
 
+    public static class ActivationEffect extends CardEffect {
+
+        protected ActivationEffect(Game game) {
+            super(game, "You use DracoMalfoy's capacity", "Opponent uses Draco Malfoy's capacity");
+        }
+
+        @Override
+        public boolean canBePlayed() {
+            return false;
+        }
+
+        @Override
+        protected void removeAction() {
+
+        }
+    }
+
 }

@@ -7,6 +7,8 @@ public class CreatureDamagePhase extends Card {
     protected CreatureDamagePhase(Game game) {
         super(game);
         realCard = false;
+        youPlayedMessage = "";
+        opponentPlayedMessage = "";
     }
 
     @Override

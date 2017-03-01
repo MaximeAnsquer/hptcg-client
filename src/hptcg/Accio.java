@@ -15,6 +15,7 @@ public class Accio extends Spell {
     public Accio(Game game) {
         super(game, 2, CHARMS);
         this.nbLessonSelected = 0;
+        this.removeActionAfterPlay = false;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class Accio extends Spell {
                         game.yourDiscardPileFrame.pack();
                         game.refresh();
                         if (nbLessonSelected == 2) {
-                            game.put("game/player" + game.yourId + "/target", lessons);
+                            game.put("game/player" + game.yourId + "/target1", lessons);
                             game.mainMessageLabel.setText(previousMainMessage);
                             game.yourDiscardPileFrame.setVisible(false);
                             for(Component card: game.yourDiscardPile.getComponents()) {
@@ -49,6 +50,7 @@ public class Accio extends Spell {
                             for(Card card: game.getAllCards()) {
                                 card.setDisabled(false);
                             }
+                            game.yourActionsLeft--;
                         }
                     }
                     @Override
@@ -72,23 +74,24 @@ public class Accio extends Spell {
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
         String previousMainMessage = game.mainMessageLabel.getText();
-        game.mainMessageLabel.setText("Your opponent is choosing lessons from his discard pile.");
+        game.mainMessageLabel.setText("Opponent is choosing lessons from his discard pile.");
         game.refresh();
-        game.put("game/player" + game.opponentId + "/target", "");
+        game.put("game/player" + game.opponentId + "/target1", "");
         game.waitFor(2000);
         (new Thread(() -> {
-            String target = game.getOpponentTarget();
+            String target = game.getOpponentTarget(1);
             String firstLesson = target.split(",")[0];
             String secondLesson = target.split(",")[1];
-            game.addMessage("Your opponent targeted: \n" + firstLesson + ", " + secondLesson);
+            game.addMessage("Opponent targeted: \n" + firstLesson + ", " + secondLesson);
             for (String lesson: new String[]{firstLesson, secondLesson}) {
-                Card lessonToRemove = (Card) Arrays.stream(game.opponentDiscardPile.getComponents())
+                Card targetLesson = (Card) Arrays.stream(game.opponentDiscardPile.getComponents())
                         .filter(card -> card.getClass().getSimpleName().equals(lesson))
                         .findFirst().get();
-                game.opponentDiscardPile.remove(lessonToRemove);
+                game.opponentDiscardPile.remove(targetLesson);
+                game.opponentHand.add(targetLesson);
             }
             game.mainMessageLabel.setText(previousMainMessage);
-            game.put("game/player" + game.yourId + "/target", "");
+            game.put("game/player" + game.yourId + "/target1", "");
             game.refresh();
         })).start();
     }

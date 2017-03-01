@@ -2,12 +2,12 @@ package hptcg;
 
 public abstract class Character extends Card {
 
-    protected boolean inPlay = false;
-
     protected Character(Game game) {
         super(game);
         removeActionAfterPlay = false;
         disableAfterPlayer = false;
+        youPlayedMessage = "You use " + cardName + "'s capacity";
+        cardEffectName = cardName + "$ActivationEffect";
     }
 
     @Override

@@ -17,17 +17,17 @@ public class TakeRoot extends Spell {
 
     public void applyCardEffect() {
         super.applyCardEffect();
-        game.put("game/player" + game.opponentId + "/target", "");
+        game.put("game/player" + game.opponentId + "/target1", "");
         String previousMainMessage = game.mainMessageLabel.getText();
-        game.mainMessageLabel.setText("Your opponent is choosing a creature to discard.");
+        game.mainMessageLabel.setText("Opponent is choosing a creature to discard.");
         game.refresh();
         (new Thread(() -> {
-            String finalTarget = game.getOpponentTarget();
+            String finalTarget = game.getOpponentTarget(1);
             Optional<Component> creatureToRemove = Arrays.stream(game.opponentCreaturesPanel.getComponents())
                     .filter(card -> card.getClass().getSimpleName().equals(finalTarget))
                     .findFirst();
             Card cardCreatureToRemove = (Card) creatureToRemove.get();
-            game.addMessage("Your opponent targeted: " + cardCreatureToRemove.getCardName());
+            game.addMessage("Opponent targeted: " + cardCreatureToRemove.getCardName());
             cardCreatureToRemove.setDisabled(true);
             game.opponentDiscardPile.add(cardCreatureToRemove);
             game.opponentCreaturesPanel.remove(cardCreatureToRemove);
@@ -42,7 +42,7 @@ public class TakeRoot extends Spell {
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Choose one of your creatures to discard.");
         game.refresh();
-        game.put("game/player" + game.yourId + "/target", "");
+        game.put("game/player" + game.yourId + "/target1", "");
         for (Card card: game.getAllCards()) {
             card.setDisabled(true);
         }
@@ -58,7 +58,7 @@ public class TakeRoot extends Spell {
                         }
                     }
                     String target = finalCard.getCardName();
-                    game.put("game/player" + game.yourId + "/target", target);
+                    game.put("game/player" + game.yourId + "/target1", target);
                     finalCard.setDisabled(true);
                     game.yourDiscardPile.add(finalCard);
                     game.yourCreaturesPanel.remove(finalCard);

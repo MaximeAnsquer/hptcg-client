@@ -3,6 +3,7 @@ package hptcg;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 public abstract class Lesson extends Card {
 
@@ -36,10 +37,13 @@ public abstract class Lesson extends Card {
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
         Image image = imageIcon.getImage();
-        Image newImage = image.getScaledInstance(88, 63,  java.awt.Image.SCALE_SMOOTH);
+        Image newImage = image.getScaledInstance(88, 63, java.awt.Image.SCALE_SMOOTH);
         setIcon(new ImageIcon(newImage));
         game.addOpponentLesson(lessonType);
         game.refresh();
     }
 
+    public LessonType getLessonType() {
+        return lessonType;
+    }
 }

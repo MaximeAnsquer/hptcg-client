@@ -34,7 +34,7 @@ public class HagridAndTheStranger extends Spell {
                         game.yourDiscardPile.remove(card);
                         ((Card) card).setDisabled(false);
                         game.yourHand.add(card);
-                        game.put("game/player" + game.yourId + "/target", creatureChosen);
+                        game.put("game/player" + game.yourId + "/target1", creatureChosen);
                         game.mainMessageLabel.setText(previousMainMessage);
                         game.yourDiscardPileFrame.setVisible(false);
                         for(Component card: game.yourDiscardPile.getComponents()) {
@@ -65,19 +65,19 @@ public class HagridAndTheStranger extends Spell {
     public void applyOpponentPlayed() {
         super.applyOpponentPlayed();
         String previousMainMessage = game.mainMessageLabel.getText();
-        game.mainMessageLabel.setText("Your opponent is choosing a creature from his discard pile.");
+        game.mainMessageLabel.setText("Opponent is choosing a creature from his discard pile.");
         game.refresh();
-        game.put("game/player" + game.opponentId + "/target", "");
+        game.put("game/player" + game.opponentId + "/target1", "");
         game.waitFor(2000);
         (new Thread(() -> {
-            String target = game.getOpponentTarget();
-            game.addMessage("Your opponent targeted: \n" + target);
+            String target = game.getOpponentTarget(1);
+            game.addMessage("Opponent targeted: \n" + target);
             Card creatureToRemove = (Card) Arrays.stream(game.opponentDiscardPile.getComponents())
                     .filter(card -> card.getClass().getSimpleName().equals(target))
                     .findFirst().get();
             game.opponentDiscardPile.remove(creatureToRemove);
             game.mainMessageLabel.setText(previousMainMessage);
-            game.put("game/player" + game.yourId + "/target", "");
+            game.put("game/player" + game.yourId + "/target1", "");
             game.refresh();
         })).start();
     }

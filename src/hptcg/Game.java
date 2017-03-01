@@ -275,7 +275,7 @@ public class Game {
     }
 
     private JLabel opponentHandLabel() {
-        opponentHandLabel =  new JLabel("Hand: " + 7);
+        opponentHandLabel =  new JLabel("Hand: " + 0);
         return opponentHandLabel;
     }
 
@@ -427,6 +427,14 @@ public class Game {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        catch(IllegalArgumentException e) {
+            System.out.println("No image for " + cardName);
+            try {
+                cardImage = ImageIO.read(getClass().getResource("images/Accio.jpg"));
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
         ImageIcon imageIcon = new ImageIcon(cardImage);
         imageIcon = resizeImage(imageIcon, scale);
         return imageIcon;
@@ -470,6 +478,7 @@ public class Game {
 
     private void createOpponent(String opponentCharacterName) {
         opponentStartingCharacter = createCard(opponentCharacterName);
+        opponentStartingCharacter.inPlay = true;
         opponentStartingCharacter.setImageScale(1.25);
         opponentDeck = createOpponentDeck();
         leftPanel.add(opponentInfoPanel(), BorderLayout.NORTH);
@@ -485,13 +494,14 @@ public class Game {
 
     private void applyOpponentsCard() {
         String cardName = get("game/player" + opponentId + "/card" + (savedNbCardsPlayedByOpponent-1));
-//        System.out.println("Opponent played: " + cardName);
-        addMessage("Your opponent played: " + cardName);
         Card opponentsCard = createCard(cardName);
-//        System.out.println("opponentsCard: " + opponentsCard);
+        if (opponentsCard.realCard && !opponentsCard.inPlay) {
+            addMessage("Opponent played: " + cardName);
+        } else {
+            addMessage(opponentsCard.opponentPlayedMessage);
+        }
         opponentsCard.applyOpponentPlayed();
         refresh();
-//        beginYourTurn();
     }
 
     private Card createCard(String cardName) {
@@ -739,14 +749,14 @@ public class Game {
         drawHandCard.applyCardEffect();
     }
 
-    public String getOpponentTarget() {
+    public String getOpponentTarget(int nb) {
         String target = null;
         boolean waiting = true;
         for (Card card: getAllCards()) {
             card.setDisabled(true);
         }
         while (waiting) {
-            target = get("game/player" + opponentId + "/target");
+            target = get("game/player" + opponentId + "/target" + nb);
             if (target != null && !target.equals("")) {
                 refresh();
                 waiting = false;
@@ -797,5 +807,6 @@ public class Game {
     public int getYourHandSize() {
         return yourHand.getComponentCount();
     }
+
 
 }
