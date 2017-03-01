@@ -11,8 +11,8 @@ import java.net.URL;
 @SuppressWarnings("Duplicates")
 public class GameManager {
 
-    //        public static String serverUrl = "http://hptcg-server.herokuapp.com/";
-    public static String serverUrl = "http://localhost:8080/";
+    public static String serverUrl = "http://hptcg-server.herokuapp.com/";
+    //    public static String serverUrl = "http://localhost:8080/";
     private final JFrame frame;
     private Font font = new Font("Arial", Font.PLAIN, 25);
 
@@ -25,7 +25,6 @@ public class GameManager {
     public GameManager() {
         frame = new JFrame("Game manager");
         frame.setVisible(true);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Rectangle availableSpace = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         int availableWidth = (int) availableSpace.getWidth();
         int availableHeight = (int) availableSpace.getHeight();

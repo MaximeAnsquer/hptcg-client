@@ -715,12 +715,6 @@ public class Game {
         return cards;
     }
 
-    public static void main(String[] args) {
-
-        new GameManager();
-
-    }
-
     public void play() {
         boolean connectionResult = connectToServer();
         if (connectionResult) {
