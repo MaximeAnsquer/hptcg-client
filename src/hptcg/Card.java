@@ -90,9 +90,9 @@ public abstract class Card extends JLabel implements ICard {
 
     public void applyCardEffect() {
         if (inPlay) {
-            game.get("game/player" + game.getYourId() + "/play/" + cardEffectName);
+            game.get("player" + game.getYourId() + "/play/" + cardEffectName);
         } else {
-            game.get("game/player" + game.getYourId() + "/play/" + cardName);
+            game.get("player" + game.getYourId() + "/play/" + cardName);
             game.removeFromHand(this);
         }
         if (disableAfterPlayer) {

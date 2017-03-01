@@ -17,7 +17,7 @@ public class TakeRoot extends Spell {
 
     public void applyCardEffect() {
         super.applyCardEffect();
-        game.put("game/player" + game.opponentId + "/target1", "");
+        game.put("player" + game.opponentId + "/target1", "");
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Opponent is choosing a creature to discard.");
         game.refresh();
@@ -42,7 +42,7 @@ public class TakeRoot extends Spell {
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Choose one of your creatures to discard.");
         game.refresh();
-        game.put("game/player" + game.yourId + "/target1", "");
+        game.put("player" + game.yourId + "/target1", "");
         for (Card card: game.getAllCards()) {
             card.setDisabled(true);
         }
@@ -58,7 +58,7 @@ public class TakeRoot extends Spell {
                         }
                     }
                     String target = finalCard.getCardName();
-                    game.put("game/player" + game.yourId + "/target1", target);
+                    game.put("player" + game.yourId + "/target1", target);
                     finalCard.setDisabled(true);
                     game.yourDiscardPile.add(finalCard);
                     game.yourCreaturesPanel.remove(finalCard);

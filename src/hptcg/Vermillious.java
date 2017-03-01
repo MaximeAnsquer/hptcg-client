@@ -20,7 +20,7 @@ public class Vermillious extends Spell {
         super.applyCardEffect();
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Please choose a target.");
-        game.put("game/player" + game.yourId + "/target1", "");
+        game.put("player" + game.yourId + "/target1", "");
         List<Card> possibleTargets = new ArrayList<>();
         possibleTargets.add(game.opponentStartingCharacter);
         possibleTargets.addAll(game.getOpponentCreatures());
@@ -36,7 +36,7 @@ public class Vermillious extends Spell {
                         c.removeMouseListener(this);
                         c.setDisabled(c.getWasDisabled());
                     }
-                    game.put("game/player" + game.yourId + "/target1", card.getCardName());
+                    game.put("player" + game.yourId + "/target1", card.getCardName());
                     game.addMessage("You targeted: " + card.getCardName());
                     if (card == game.opponentStartingCharacter) {
                         game.damageOpponent(3);

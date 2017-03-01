@@ -34,7 +34,7 @@ public class HagridAndTheStranger extends Spell {
                         game.yourDiscardPile.remove(card);
                         ((Card) card).setDisabled(false);
                         game.yourHand.add(card);
-                        game.put("game/player" + game.yourId + "/target1", creatureChosen);
+                        game.put("player" + game.yourId + "/target1", creatureChosen);
                         game.mainMessageLabel.setText(previousMainMessage);
                         game.yourDiscardPileFrame.setVisible(false);
                         for(Component card: game.yourDiscardPile.getComponents()) {
@@ -67,7 +67,7 @@ public class HagridAndTheStranger extends Spell {
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Opponent is choosing a creature from his discard pile.");
         game.refresh();
-        game.put("game/player" + game.opponentId + "/target1", "");
+        game.put("player" + game.opponentId + "/target1", "");
         game.waitFor(2000);
         (new Thread(() -> {
             String target = game.getOpponentTarget(1);
@@ -77,7 +77,7 @@ public class HagridAndTheStranger extends Spell {
                     .findFirst().get();
             game.opponentDiscardPile.remove(creatureToRemove);
             game.mainMessageLabel.setText(previousMainMessage);
-            game.put("game/player" + game.yourId + "/target1", "");
+            game.put("player" + game.yourId + "/target1", "");
             game.refresh();
         })).start();
     }

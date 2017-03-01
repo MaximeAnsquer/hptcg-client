@@ -18,7 +18,7 @@ public class Incarcifors extends Spell {
     @Override
     public void applyCardEffect() {
         super.applyCardEffect();
-        game.put("game/player" + game.yourId + "/target1", "");
+        game.put("player" + game.yourId + "/target1", "");
         game.mainMessageLabel.setText("Choose target creature.");
         game.refresh();
         for (Card card: game.getAllCards()) {
@@ -36,7 +36,7 @@ public class Incarcifors extends Spell {
                         }
                     }
                     String target = finalCard.getCardName();
-                    game.put("game/player" + game.yourId + "/target1", target);
+                    game.put("player" + game.yourId + "/target1", target);
                     finalCard.setDisabled(true);
                     game.opponentDiscardPile.add(finalCard);
                     game.opponentCreaturesPanel.remove(finalCard);

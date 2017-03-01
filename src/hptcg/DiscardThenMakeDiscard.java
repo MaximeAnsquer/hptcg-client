@@ -16,7 +16,7 @@ public class DiscardThenMakeDiscard extends Card {
     @Override
     public void applyCardEffect() {
         super.applyCardEffect();
-        game.put("game/player" + game.yourId + "/target1", "");
+        game.put("player" + game.yourId + "/target1", "");
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Choose a card to discard.");
         for (Card card: game.getAllCards()) {
@@ -28,7 +28,7 @@ public class DiscardThenMakeDiscard extends Card {
             card.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    game.put("game/player" + game.yourId + "/target1", card.getCardName());
+                    game.put("player" + game.yourId + "/target1", card.getCardName());
                     for (Component component: game.yourHand.getComponents()) {
                         ((Card) component).removeLastMouseListener();
                     }
@@ -71,7 +71,7 @@ public class DiscardThenMakeDiscard extends Card {
         }
         game.opponentHand.remove(cardToRemove);
         game.opponentDiscardPile.add(cardToRemove);
-        game.put("game/player" + game.opponentId + "/target1", "");
+        game.put("player" + game.opponentId + "/target1", "");
         game.refresh();
     }
 

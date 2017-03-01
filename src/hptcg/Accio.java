@@ -41,7 +41,7 @@ public class Accio extends Spell {
                         game.yourDiscardPileFrame.pack();
                         game.refresh();
                         if (nbLessonSelected == 2) {
-                            game.put("game/player" + game.yourId + "/target1", lessons);
+                            game.put("player" + game.yourId + "/target1", lessons);
                             game.mainMessageLabel.setText(previousMainMessage);
                             game.yourDiscardPileFrame.setVisible(false);
                             for(Component card: game.yourDiscardPile.getComponents()) {
@@ -76,7 +76,7 @@ public class Accio extends Spell {
         String previousMainMessage = game.mainMessageLabel.getText();
         game.mainMessageLabel.setText("Opponent is choosing lessons from his discard pile.");
         game.refresh();
-        game.put("game/player" + game.opponentId + "/target1", "");
+        game.put("player" + game.opponentId + "/target1", "");
         game.waitFor(2000);
         (new Thread(() -> {
             String target = game.getOpponentTarget(1);
@@ -91,7 +91,7 @@ public class Accio extends Spell {
                 game.opponentHand.add(targetLesson);
             }
             game.mainMessageLabel.setText(previousMainMessage);
-            game.put("game/player" + game.yourId + "/target1", "");
+            game.put("player" + game.yourId + "/target1", "");
             game.refresh();
         })).start();
     }

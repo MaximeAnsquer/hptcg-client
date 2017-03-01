@@ -3,6 +3,8 @@ package hptcg;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,8 +41,6 @@ public class Game {
     Card yourStartingCharacter;
     Card opponentStartingCharacter;
     private JPanel leftPanel;
-    //    private String serverUrl = "http://hptcg-server.herokuapp.com/";
-    private String serverUrl = "http://localhost:8080/";
     Map<LessonType, Integer> totalPower;
     JLabel lastSpellPlayedLabel;
     JPanel yourDiscardPile;
@@ -68,8 +68,10 @@ public class Game {
     public Container opponentHand;
     private JButton opponentHandButton;
     private boolean canSeeOpponentHand = false;
+    private int gameId;
 
-    public Game() {
+    public Game(int gameId) {
+        this.gameId = gameId;
         cardsImageIcons = new Hashtable<>();
         endTurnCard  = new EndTurn(this);
         drawCard  = new Draw(this);
@@ -100,8 +102,19 @@ public class Game {
         contentPane.add(gameMessagesPanel(), BorderLayout.EAST);
         contentPane.add(leftPanel(), BorderLayout.WEST);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        deleteGameOnClose();
         frame.pack();
         frame.setVisible(true);
+    }
+
+    private void deleteGameOnClose() {
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                GameManager.get("gameManager/delete/" + gameId);
+                super.windowClosing(e);
+            }
+        });
     }
 
     private Map<Integer, Card> createYourDeck() {
@@ -458,12 +471,12 @@ public class Game {
         System.out.println("Waiting for an opponent to connect to the server...");
         mainMessageLabel.setText("Waiting for an opponent");
         while(waiting) {
-            if(get("game/player" + opponentId + "/status").equals("connected")) {
+            if(get("player" + opponentId + "/status").equals("connected")) {
                 waiting = false;
                 System.out.println("An opponent joined the game!");
                 yourTurn = yourId == 1;
                 waitFor(1000);
-                String opponentCharacterName = get("game/player" + opponentId + "/startingCharacter");
+                String opponentCharacterName = get("player" + opponentId + "/startingCharacter");
                 System.out.println("opponentCharacterName: " + opponentCharacterName);
                 createOpponent(opponentCharacterName);
                 this.refresh();
@@ -493,7 +506,7 @@ public class Game {
     }
 
     private void applyOpponentsCard() {
-        String cardName = get("game/player" + opponentId + "/card" + (savedNbCardsPlayedByOpponent-1));
+        String cardName = get("player" + opponentId + "/card" + (savedNbCardsPlayedByOpponent-1));
         Card opponentsCard = createCard(cardName);
         if (opponentsCard.realCard && !opponentsCard.inPlay) {
             addMessage("Opponent played: " + cardName);
@@ -525,8 +538,8 @@ public class Game {
             draw();
         }
         yourActionsLeft = 2;
-//        put("game/player1/resetPlayedCards", "");
-//        put("game/player2/resetPlayedCards", "");
+//        put("player1/resetPlayedCards", "");
+//        put("player2/resetPlayedCards", "");
         System.out.println("Beginning your turn");
         yourTurn = true;
         mainMessageLabel.setText("It's your turn");
@@ -536,22 +549,21 @@ public class Game {
         refresh();
     }
 
-    private void connectToServer() {
-        String connectionResult = get("game/join");
+    private boolean connectToServer() {
+        String connectionResult = get("join");
         if (connectionResult.equals("Game is full")) {
-            get("game/reset");
-            System.out.println("Game was reset");
-            waitFor(1000);
-            connectToServer();
+            JOptionPane.showMessageDialog(frame, "The game is full");
+            frame.dispose();
+            return false;
         } else {
             yourId = Integer.parseInt(connectionResult);
             System.out.println("You are player " + yourId);
-            put("game/player" + yourId + "/startingCharacter", yourStartingCharacter.getCardName());
+            put("player" + yourId + "/startingCharacter", yourStartingCharacter.getCardName());
             opponentId = yourId == 1 ? 2 : 1;
             yourTurn = false;
+            savedNbCardsPlayedByOpponent = 0;
         }
-        savedNbCardsPlayedByOpponent = 0;
-        put("game/player" + yourId + "/resetPlayedCards", "");
+        return true;
     }
 
     private boolean newCardFromOpponent() {
@@ -565,12 +577,12 @@ public class Game {
     }
 
     private int fetchedNbCardsPlayedByOpponent() {
-        return Integer.parseInt(get("game/player" + opponentId + "/nbCardsPlayed"));
+        return Integer.parseInt(get("player" + opponentId + "/nbCardsPlayed"));
     }
 
     public String get(String uri) {
         String result = "";
-        String url = serverUrl + uri;
+        String url = GameManager.serverUrl + "game" + gameId + "/" + uri;
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
             result = br.readLine();
@@ -582,7 +594,7 @@ public class Game {
 
     public void put(String uri, String payload) {
         try {
-            URL url = new URL(serverUrl + uri);
+            URL url = new URL(GameManager.serverUrl + "game" + gameId + "/" + uri);
             HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
             httpCon.setDoOutput(true);
             httpCon.setRequestMethod("PUT");
@@ -705,20 +717,25 @@ public class Game {
 
     public static void main(String[] args) {
 
-        Game game = new Game();
+        new GameManager();
 
-        game.connectToServer();
-        game.waitForOpponent();
-        game.drawHands();
+    }
 
-        while(true) {
-            game.waitFor(100);  // delay so that the yourTurn variable knows it changed
-            game.checkActionsLeft();
-            while(!game.yourTurn) {
-                if(game.newCardFromOpponent()) {
-                    game.applyOpponentsCard();
+    public void play() {
+        boolean connectionResult = connectToServer();
+        if (connectionResult) {
+            waitForOpponent();
+            drawHands();
+
+            while(true) {
+                waitFor(100);  // delay so that the yourTurn variable knows it changed
+                checkActionsLeft();
+                while(!yourTurn) {
+                    if(newCardFromOpponent()) {
+                        applyOpponentsCard();
+                    }
+                    waitFor(1200);
                 }
-                game.waitFor(1200);
             }
         }
     }
@@ -756,7 +773,7 @@ public class Game {
             card.setDisabled(true);
         }
         while (waiting) {
-            target = get("game/player" + opponentId + "/target" + nb);
+            target = get("player" + opponentId + "/target" + nb);
             if (target != null && !target.equals("")) {
                 refresh();
                 waiting = false;
@@ -776,7 +793,7 @@ public class Game {
             JOptionPane.showMessageDialog(frame, "You won the game!");
             System.exit(0);
         } else {
-            String cards = get("game/player" + opponentId + "/popDeckCopy/" + n);
+            String cards = get("player" + opponentId + "/popDeckCopy/" + n);
             for (String cardNbString: cards.split(",")) {
                 Card card = opponentDeck.get(Integer.parseInt(cardNbString));
                 card.setDisabled(true);
@@ -793,7 +810,7 @@ public class Game {
             JOptionPane.showMessageDialog(frame, "You lost the game.");
             System.exit(0);
         } else {
-            String cards = get("game/player" + yourId + "/popDeck/" + n);
+            String cards = get("player" + yourId + "/popDeck/" + n);
             for (String cardNbString: cards.split(",")) {
                 Card card = yourDeck.get(Integer.parseInt(cardNbString));
                 card.setDisabled(true);

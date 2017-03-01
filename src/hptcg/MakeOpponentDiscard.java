@@ -37,7 +37,7 @@ public class MakeOpponentDiscard extends Card {
                         Card card = (Card) component;
                         card.removeLastMouseListener();
                     }
-                    game.put("game/player" + game.yourId + "/target2", card.getCardName());
+                    game.put("player" + game.yourId + "/target2", card.getCardName());
                     card.setDisabled(true);
                     game.opponentHand.remove(card);
                     game.opponentDiscardPile.add(card);
@@ -66,7 +66,7 @@ public class MakeOpponentDiscard extends Card {
                     Card card = (Card) component;
                     card.removeLastMouseListener();
                 }
-                game.put("game/player" + game.yourId + "/target2", "nothing");
+                game.put("player" + game.yourId + "/target2", "nothing");
                 game.yourActionsLeft--;
                 game.mainMessageLabel.setText(previousMainMessage);
                 game.refresh();
@@ -92,7 +92,7 @@ public class MakeOpponentDiscard extends Card {
             }
             game.yourHand.remove(cardToDiscard);
             game.yourDiscardPile.add(cardToDiscard);
-            game.put("game/player" + game.opponentId + "/target1", "");
+            game.put("player" + game.opponentId + "/target1", "");
             game.refresh();
         }
     }
