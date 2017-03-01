@@ -11,8 +11,8 @@ import java.net.URL;
 @SuppressWarnings("Duplicates")
 public class GameManager {
 
-    public static String serverUrl = "http://hptcg-server.herokuapp.com/";
-    //    public static String serverUrl = "http://localhost:8080/";
+    //    public static String serverUrl = "http://hptcg-server.herokuapp.com/";
+    public static String serverUrl = "http://localhost:8080/";
     private final JFrame frame;
     private Font font = new Font("Arial", Font.PLAIN, 25);
 

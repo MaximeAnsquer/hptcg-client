@@ -68,7 +68,7 @@ public class Game {
     public Container opponentHand;
     private JButton opponentHandButton;
     private boolean canSeeOpponentHand = false;
-    private int gameId;
+    public int gameId;
 
     public Game(int gameId) {
         this.gameId = gameId;
@@ -111,6 +111,8 @@ public class Game {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                get("player" + getYourId() + "/play/QuitGame");
+                waitFor(1000);
                 GameManager.get("gameManager/delete/" + gameId);
                 super.windowClosing(e);
             }
